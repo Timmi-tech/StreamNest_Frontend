@@ -6,14 +6,17 @@ export const useLogin = () => {
     mutationFn: async (data) => login(data),
     onSuccess: (response) => {
       console.log("Login successful", response);
+      return response.data;
     },
     onError: (error) => {
-      throw error;
+      return error.response.data.errors.Authentication;
+
+      // throw error.response.data.errors;
     },
   });
 };
 
-export const useSignUp = (data) => {
+export const useSignUp = () => {
   return useMutation({
     mutationFn: async (data) => signUp(data),
     onSuccess: (response) => {

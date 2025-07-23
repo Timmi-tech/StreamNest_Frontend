@@ -1,669 +1,605 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
-  Video,
-  Search,
-  Filter,
-  Bell,
-  Settings,
-  LogOut,
-  Play,
-  Clock,
   Heart,
-  Share2,
-  BookmarkPlus,
-  Bookmark,
-  Eye,
-  Users,
-  TrendingUp,
-  Calendar,
-  Star,
   MessageCircle,
-  ChevronRight,
+  Share2,
+  Bookmark,
   MoreVertical,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  User,
   Home,
-  History,
-  Library,
-  ThumbsUp,
-  Download,
-  Sparkles,
+  Search,
+  PlusCircle,
+  Bell,
+  ChevronLeft,
   Music,
-  Gamepad2,
-  Newspaper,
-  Lightbulb,
-  Tv,
-  Monitor,
-  Smartphone,
-  Flame,
-  Trash2,
+  Video,
+  LogOut,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { getUser, LogUserOut } from "@/store/AuthStore";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useVideoHook } from "@/hooks/useVideoHooks";
 
-export default function ConsumerDashboard() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [bookmarkedVideos, setBookmarkedVideos] = useState(new Set([1, 3, 5]));
-
-  // Mock data
-  const categories = [
-    { id: "all", name: "All", icon: Home },
-    { id: "trending", name: "Trending", icon: TrendingUp },
-    { id: "tech", name: "Technology", icon: Monitor },
-    { id: "music", name: "Music", icon: Music },
-    { id: "gaming", name: "Gaming", icon: Gamepad2 },
-    { id: "news", name: "News", icon: Newspaper },
-    { id: "education", name: "Education", icon: Lightbulb },
-    { id: "entertainment", name: "Entertainment", icon: Tv },
-  ];
-
-  const featuredVideos = [
-    {
-      id: 1,
-      title: "The Future of Web Development in 2024",
-      thumbnail: "/api/placeholder/400/225",
-      creator: "TechGuru",
-      creatorAvatar: "/api/placeholder/40/40",
-      views: 125000,
-      likes: 8500,
-      duration: "22:30",
-      uploadDate: "2024-01-15",
-      category: "tech",
-      verified: true,
-    },
-    {
-      id: 2,
-      title: "Epic Gaming Moments Compilation",
-      thumbnail: "/api/placeholder/400/225",
-      creator: "GameMaster",
-      creatorAvatar: "/api/placeholder/40/40",
-      views: 89000,
-      likes: 5200,
-      duration: "15:45",
-      uploadDate: "2024-01-14",
-      category: "gaming",
-      verified: false,
-    },
-    {
-      id: 3,
-      title: "Learning React in 30 Minutes",
-      thumbnail: "/api/placeholder/400/225",
-      creator: "CodeAcademy",
-      creatorAvatar: "/api/placeholder/40/40",
-      views: 67000,
-      likes: 4100,
-      duration: "28:12",
-      uploadDate: "2024-01-13",
-      category: "education",
-      verified: true,
-    },
-  ];
-
-  const recommendedVideos = [
-    {
-      id: 4,
-      title: "10 JavaScript Tips Every Developer Should Know",
-      thumbnail: "/api/placeholder/320/180",
-      creator: "WebDevPro",
-      creatorAvatar: "/api/placeholder/40/40",
-      views: 45000,
-      likes: 2800,
-      duration: "18:30",
-      uploadDate: "2024-01-12",
-      category: "tech",
-    },
-    {
-      id: 5,
-      title: "Best Music Releases This Week",
-      thumbnail: "/api/placeholder/320/180",
-      creator: "MusicReview",
-      creatorAvatar: "/api/placeholder/40/40",
-      views: 34000,
-      likes: 1900,
-      duration: "12:45",
-      uploadDate: "2024-01-11",
-      category: "music",
-    },
-    {
-      id: 6,
-      title: "Breaking: Tech Industry Updates",
-      thumbnail: "/api/placeholder/320/180",
-      creator: "TechNews",
-      creatorAvatar: "/api/placeholder/40/40",
-      views: 78000,
-      likes: 3400,
-      duration: "08:20",
-      uploadDate: "2024-01-10",
-      category: "news",
-    },
-    {
-      id: 7,
-      title: "CSS Grid Complete Guide",
-      thumbnail: "/api/placeholder/320/180",
-      creator: "DesignMaster",
-      creatorAvatar: "/api/placeholder/40/40",
-      views: 23000,
-      likes: 1600,
-      duration: "35:15",
-      uploadDate: "2024-01-09",
-      category: "education",
-    },
-    {
-      id: 8,
-      title: "Gaming Setup Tour 2024",
-      thumbnail: "/api/placeholder/320/180",
-      creator: "GamerLife",
-      creatorAvatar: "/api/placeholder/40/40",
-      views: 56000,
-      likes: 4200,
-      duration: "16:40",
-      uploadDate: "2024-01-08",
-      category: "gaming",
-    },
-  ];
-
-  const watchHistory = [
-    {
-      id: 9,
-      title: "Python for Beginners",
-      thumbnail: "/api/placeholder/160/90",
-      creator: "PythonPro",
-      watchedPercentage: 75,
-      lastWatched: "2 hours ago",
-    },
-    {
-      id: 10,
-      title: "UI/UX Design Principles",
-      thumbnail: "/api/placeholder/160/90",
-      creator: "DesignGuru",
-      watchedPercentage: 100,
-      lastWatched: "1 day ago",
-    },
-    {
-      id: 11,
-      title: "Database Optimization",
-      thumbnail: "/api/placeholder/160/90",
-      creator: "DataExpert",
-      watchedPercentage: 45,
-      lastWatched: "3 days ago",
-    },
-  ];
-
-  const subscriptions = [
-    {
-      id: 1,
-      name: "TechGuru",
-      avatar: "/api/placeholder/40/40",
-      subscribers: "2.5M",
-      isLive: false,
-      verified: true,
-    },
-    {
-      id: 2,
-      name: "CodeAcademy",
-      avatar: "/api/placeholder/40/40",
-      subscribers: "1.8M",
-      isLive: true,
-      verified: true,
-    },
-    {
-      id: 3,
-      name: "GameMaster",
-      avatar: "/api/placeholder/40/40",
-      subscribers: "965K",
-      isLive: false,
-      verified: false,
-    },
-  ];
-
-  const formatNumber = (num) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toString();
-  };
-
-  const formatDuration = (duration) => {
-    return duration;
-  };
-
-  const timeAgo = (date) => {
-    const now = new Date();
-    const videoDate = new Date(date);
-    const diffInHours = Math.floor((now - videoDate) / (1000 * 60 * 60));
-
-    if (diffInHours < 24) return `${diffInHours} hours ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays} days ago`;
-    return `${Math.floor(diffInDays / 7)} weeks ago`;
-  };
-
-  const toggleBookmark = (videoId) => {
-    setBookmarkedVideos((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(videoId)) {
-        newSet.delete(videoId);
-      } else {
-        newSet.add(videoId);
-      }
-      return newSet;
-    });
-  };
-
-  const VideoCard = ({ video, size = "normal" }) => (
-    <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
-      <div className="relative">
-        <img
-          src={video.thumbnail}
-          alt={video.title}
-          className={`w-full object-cover rounded-t-lg ${
-            size === "large" ? "h-56" : "h-40"
-          }`}
-        />
-        <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
-          {video.duration}
-        </div>
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center rounded-t-lg">
-          <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </div>
-      </div>
-      <CardContent className="p-4">
-        <div className="flex items-start space-x-3">
-          <Avatar className="w-10 h-10 flex-shrink-0">
-            <AvatarImage src={video.creatorAvatar} alt={video.creator} />
-            <AvatarFallback>{video.creator[0]}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm leading-tight mb-1 line-clamp-2">
-              {video.title}
-            </h3>
-            <div className="flex items-center space-x-1 mb-2">
-              <span className="text-xs text-muted-foreground">
-                {video.creator}
-              </span>
-              {video.verified && (
-                <Badge variant="secondary" className="h-4 px-1 text-xs">
-                  <Star className="w-3 h-3" />
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-              <span>{formatNumber(video.views)} views</span>
-              <span>•</span>
-              <span>{timeAgo(video.uploadDate)}</span>
-            </div>
-          </div>
-          <div className="flex flex-col space-y-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => toggleBookmark(video.id)}
-            >
-              {bookmarkedVideos.has(video.id) ? (
-                <Bookmark className="w-4 h-4 text-primary" />
-              ) : (
-                <BookmarkPlus className="w-4 h-4" />
-              )}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Eye className="mr-2 h-4 w-4" />
-                  Not interested
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+const render = "once";
+export default function HTML5VideoFeed() {
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [volume, setVolume] = useState(0.8);
+  const [likedVideos, setLikedVideos] = useState(new Set([0, 2]));
+  const [followedUsers, setFollowedUsers] = useState(
+    new Set(["user1", "user3"])
   );
+  const [videoDurations, setVideoDurations] = useState({});
+  const [videoProgress, setVideoProgress] = useState({});
+  const [loadedVideos, setLoadedVideos] = useState(new Set());
+  const [videoStates, setVideoStates] = useState({});
+  const [videosToLoad, setVideosToLoad] = useState(new Set([0])); // Only load first video initially
+
+  const containerRef = useRef(null);
+  const videoRefs = useRef([]);
+
+  // Working test videos
+  const videos = [
+    {
+      id: "1",
+      title: "Big Buck Bunny",
+      description:
+        "A classic test video - Big Buck Bunny animated short film 🐰",
+      genre: "Animation",
+      ageRating: "All",
+      videoUrl:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+      videoYear: 2008,
+      uploadedAt: "2025-07-23T12:57:47.286Z",
+      userId: "user1",
+      tags: ["animation", "test", "bunny"],
+      user: {
+        username: "@animation_test",
+        displayName: "Animation Test",
+        avatar: "/api/placeholder/40/40",
+        verified: true,
+        followers: "1M",
+      },
+      stats: { likes: 50000, comments: 1200, shares: 800, views: "500K" },
+    },
+    {
+      id: "2",
+      title: "Elephants Dream",
+      description: "Another test video - Elephants Dream short film 🐘",
+      genre: "Animation",
+      ageRating: "All",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      videoYear: 2006,
+      uploadedAt: "2025-07-23T10:30:22.186Z",
+      userId: "user2",
+      tags: ["animation", "dream", "elephant"],
+      user: {
+        username: "@dream_studio",
+        displayName: "Dream Studio",
+        avatar: "/api/placeholder/40/40",
+        verified: false,
+        followers: "750K",
+      },
+      stats: { likes: 35000, comments: 890, shares: 450, views: "350K" },
+    },
+    {
+      id: "3",
+      title: "For Bigger Blazes",
+      description: "Test video - For Bigger Blazes 🔥",
+      genre: "Demo",
+      ageRating: "All",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+      videoYear: 2010,
+      uploadedAt: "2025-07-23T08:15:33.486Z",
+      userId: "user3",
+      tags: ["demo", "test", "blazes"],
+      user: {
+        username: "@demo_channel",
+        displayName: "Demo Channel",
+        avatar: "/api/placeholder/40/40",
+        verified: true,
+        followers: "900K",
+      },
+      stats: { likes: 42000, comments: 1100, shares: 620, views: "420K" },
+    },
+    {
+      id: "4",
+      title: "For Bigger Blazes",
+      description: "Test video - For Bigger Blazes 🔥",
+      genre: "Demo",
+      ageRating: "All",
+      videoUrl:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+      videoYear: 2010,
+      uploadedAt: "2025-07-23T08:15:33.486Z",
+      userId: "user3",
+      tags: ["demo", "test", "blazes"],
+      user: {
+        username: "@demo_channel",
+        displayName: "Demo Channel",
+        avatar: "/api/placeholder/40/40",
+        verified: true,
+        followers: "900K",
+      },
+      stats: { likes: 42000, comments: 1100, shares: 620, views: "420K" },
+    },
+    {
+      id: "5",
+      title: "For Bigger Blazes",
+      description: "Test video - For Bigger Blazes 🔥",
+      genre: "Demo",
+      ageRating: "All",
+      videoUrl:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+      videoYear: 2010,
+      uploadedAt: "2025-07-23T08:15:33.486Z",
+      userId: "user3",
+      tags: ["demo", "test", "blazes"],
+      user: {
+        username: "@demo_channel",
+        displayName: "Demo Channel",
+        avatar: "/api/placeholder/40/40",
+        verified: true,
+        followers: "900K",
+      },
+      stats: { likes: 42000, comments: 1100, shares: 620, views: "420K" },
+    },
+  ];
+
+  const {
+    formatNumber,
+    timeAgo,
+    toggleLike,
+    toggleFollow,
+    playVideo,
+    pauseVideo,
+    handleScroll,
+    scrollToVideo,
+    handleVideoLoaded,
+    handleVideoPlay,
+    handleVideoPause,
+    handleVideoEnded,
+    handleVideoProgress,
+    handleVideoDuration,
+    handleVideoError,
+    togglePlayPause,
+    toggleMute,
+    seekTo,
+  } = useVideoHook({
+    setLikedVideos,
+    setFollowedUsers,
+    setVideoStates,
+    setVideosToLoad,
+    setCurrentVideoIndex,
+    setIsPlaying,
+    containerRef,
+    setLoadedVideos,
+    currentVideoIndex,
+    videos,
+    setVideoProgress,
+    setVideoDurations,
+    videoRefs,
+    setIsMuted,
+    isMuted,
+  });
+
+  const router = useRouter();
+
+  // log user out
+  const handleLogOut = () => {
+    LogUserOut();
+    console.log("logged out");
+    router.push("auth/login");
+    // routerServerGlobal.
+  };
+
+  // Auto-start first video and preload nearby videos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsPlaying(true);
+      playVideo(0);
+      preloadVideos(0); // Preload first few videos
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle volume changes
+  useEffect(() => {
+    videoRefs.current.forEach((video) => {
+      if (video) {
+        video.volume = isMuted ? 0 : volume;
+        video.muted = isMuted;
+      }
+    });
+  }, [volume, isMuted]);
+
+  useEffect(() => {
+    toast.info("Video muted? ", {
+      description: "Click the Unmute button at the bottom of the Screen😉",
+    });
+  }, [render]);
+
+  // user details
+  const user = getUser();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-40">
-        <div className="flex items-center justify-between px-6 py-4">
+    <div className="h-screen bg-black relative overflow-hidden">
+      {/* Enhanced Debug Info */}
+      {/* <div className="absolute top-4 left-4 z-50 bg-black/90 text-white p-3 rounded text-xs max-w-sm">
+        <div className="font-bold mb-2">Lazy Loading Debug:</div>
+        <div>Current: {currentVideoIndex}</div>
+        <div>Playing: {isPlaying ? "Yes" : "No"}</div>
+        <div>Muted: {isMuted ? "Yes" : "No"}</div>
+        <div>Loaded: {Array.from(loadedVideos).join(", ")}</div>
+        <div>To Load: {Array.from(videosToLoad).join(", ")}</div>
+        <div>
+          Current State: {videoStates[currentVideoIndex] || "not loaded"}
+        </div>
+        <div className="text-green-400 mt-2">📱 Lazy Loading Active</div>
+        <div className="text-blue-400 text-xs mt-1">
+          Only loads {videosToLoad.size}/{videos.length} videos
+        </div>
+      </div> */}
+
+      {/* Top Navigation */}
+      <div className="absolute top-0 left-0 right-0 z-30 bg-gradient-to-b from-black/80 to-transparent">
+        <div className="flex items-center justify-between p-4 pt-5">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-chart-2 rounded-xl flex items-center justify-center">
-                <Video className="w-6 h-6 text-white" />
+            <button className="text-white p-2 hover:bg-white/10 rounded-full">
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-chart-2 rounded-xl flex items-center justify-center">
+                  <Video className="w-6 h-6 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse"></div>
               </div>
-              <div>
-                <h1 className="text-xl font-bold">StreamNest</h1>
-                <Badge variant="outline" className="text-xs mt-1">
-                  Discover
-                </Badge>
-              </div>
+            </button>
+            <div>
+              <h1 className="text-white text-lg font-bold">StreamNest</h1>
+              <p className="text-white font-bold">Hello {user?.firstname} 😀</p>
             </div>
           </div>
-
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search videos, creators..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-80"
-              />
-            </div>
-            <Button variant="ghost" size="icon">
-              <Bell className="w-5 h-5" />
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-8 w-8 rounded-full"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/api/placeholder/32/32" alt="Profile" />
-                    <AvatarFallback className="bg-primary text-white">
-                      JS
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end">
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* search and more */}
+          <div className="flex items-center space-x-2">
+            {/* <button className="text-white p-2 hover:bg-white/10 rounded-full">
+              <Search className="w-6 h-6" />
+            </button> */}
+            <button
+              onClick={handleLogOut}
+              className="text-black p-1 px-4 bg-white hover:bg-white/10 rounded-full"
+            >
+              Log out
+              {/* <LogOut className="w-6 h-6" /> */}
+            </button>
           </div>
         </div>
-      </header>
+      </div>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 border-r border-border bg-card/30 h-[calc(100vh-73px)] overflow-y-auto">
-          <div className="p-4 space-y-6">
-            {/* Navigation */}
-            <div className="space-y-2">
-              <Button variant="ghost" className="w-full justify-start">
-                <Home className="mr-2 h-4 w-4" />
-                Home
-              </Button>
-              <Button variant="ghost" className="w-full justify-start">
-                <TrendingUp className="mr-2 h-4 w-4" />
-                Trending
-              </Button>
-              <Button variant="ghost" className="w-full justify-start">
-                <History className="mr-2 h-4 w-4" />
-                History
-              </Button>
-              <Button variant="ghost" className="w-full justify-start">
-                <Library className="mr-2 h-4 w-4" />
-                Library
-              </Button>
-              <Button variant="ghost" className="w-full justify-start">
-                <ThumbsUp className="mr-2 h-4 w-4" />
-                Liked Videos
-              </Button>
-            </div>
-
-            <Separator />
-
-            {/* Subscriptions */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Subscriptions
-              </h3>
-              {subscriptions.map((sub) => (
-                <div
-                  key={sub.id}
-                  className="flex items-center space-x-3 p-2 rounded-lg hover:bg-accent/50 cursor-pointer"
-                >
-                  <div className="relative">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={sub.avatar} alt={sub.name} />
-                      <AvatarFallback>{sub.name[0]}</AvatarFallback>
-                    </Avatar>
-                    {sub.isLive && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-1">
-                      <span className="text-sm font-medium truncate">
-                        {sub.name}
-                      </span>
-                      {sub.verified && (
-                        <Star className="w-3 h-3 text-primary" />
-                      )}
+      {/* Video Feed */}
+      <div
+        ref={containerRef}
+        className="h-full overflow-y-scroll snap-y snap-mandatory"
+        onScroll={handleScroll}
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {videos.map((video, index) => (
+          <div
+            key={video.id}
+            className="h-screen w-full snap-start relative bg-black"
+          >
+            {/* Lazy Loaded HTML5 Video */}
+            <div className="absolute inset-0">
+              {videosToLoad.has(index) ? (
+                // Load video only when needed
+                <video
+                  ref={(el) => (videoRefs.current[index] = el)}
+                  src={video.videoUrl}
+                  className="w-full h-full object-cover"
+                  muted={isMuted}
+                  loop
+                  playsInline
+                  preload="metadata" // Only load metadata initially
+                  webkit-playsinline="true"
+                  onLoadedData={() => handleVideoLoaded(index)}
+                  onLoadStart={() => {
+                    console.log(`📥 Video ${index} loading started`);
+                    setVideoStates((prev) => ({ ...prev, [index]: "loading" }));
+                  }}
+                  onCanPlay={() => {
+                    console.log(`✅ Video ${index} can play`);
+                    setVideoStates((prev) => ({ ...prev, [index]: "ready" }));
+                  }}
+                  onPlay={() => handleVideoPlay(index)}
+                  onPause={() => handleVideoPause(index)}
+                  onEnded={() => handleVideoEnded(index)}
+                  onTimeUpdate={(e) => handleVideoProgress(index, e)}
+                  onDurationChange={(e) => handleVideoDuration(index, e)}
+                  onError={(e) => handleVideoError(index, e.target.error)}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    backgroundColor: "#000",
+                  }}
+                />
+              ) : (
+                // Placeholder for unloaded videos
+                <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+                  <div className="text-white/60 text-center">
+                    <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-3 mx-auto">
+                      <Play className="w-8 h-8 text-white/40" />
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {sub.subscribers} subscribers
-                    </div>
+                    <div className="text-sm font-medium">{video.title}</div>
+                    <div className="text-xs mt-1">Scroll to load video</div>
                   </div>
                 </div>
-              ))}
+              )}
+
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none z-5" />
             </div>
 
-            <Separator />
+            {/* Loading State - Only show for videos that should be loading */}
+            {videosToLoad.has(index) && !loadedVideos.has(index) && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                  <span className="text-white text-sm">
+                    Loading {video.title}...
+                  </span>
+                  <div className="text-white/60 text-xs text-center max-w-xs">
+                    Video {index + 1} of {videos.length}
+                  </div>
+                </div>
+              </div>
+            )}
 
-            {/* Categories */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Categories
-              </h3>
-              <div className="space-y-1">
-                {categories.map((category) => {
-                  const Icon = category.icon;
-                  return (
-                    <Button
-                      key={category.id}
-                      variant={
-                        selectedCategory === category.id ? "secondary" : "ghost"
-                      }
-                      className="w-full justify-start"
-                      onClick={() => setSelectedCategory(category.id)}
+            {/* Play/Pause Overlay - Only show for loaded videos */}
+            {videosToLoad.has(index) && (
+              <div
+                className="absolute inset-0 flex items-center justify-center z-10"
+                onClick={togglePlayPause}
+              >
+                {!isPlaying &&
+                  index === currentVideoIndex &&
+                  loadedVideos.has(index) && (
+                    <div className="bg-black/60 rounded-full p-6 animate-pulse">
+                      <Play className="w-16 h-16 text-white fill-white" />
+                    </div>
+                  )}
+              </div>
+            )}
+
+            {/* Right Side Actions */}
+            <div className="absolute right-4 bottom-5 flex flex-col items-center space-y-6 z-20">
+              {/* User Avatar */}
+              <div className="relative">
+                {/* <div className="w-14 h-14 border-2 border-white rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
+                  {video.user.displayName[0]}
+                </div> */}
+                {/* {!followedUsers.has(video.userId) && (
+                  <button
+                    className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-colors"
+                    onClick={() => toggleFollow(video.userId)}
+                  >
+                    <PlusCircle className="w-4 h-4 text-white" />
+                  </button>
+                )} */}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col items-center">
+                <button
+                  className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+                  onClick={() => toggleLike(video.id, index)}
+                >
+                  <Heart
+                    className={`w-7 h-7 transition-colors ${
+                      likedVideos.has(index)
+                        ? "fill-red-500 text-red-500"
+                        : "text-white hover:text-red-300"
+                    }`}
+                  />
+                </button>
+                <span className="text-white text-xs font-medium mt-1">
+                  {formatNumber(
+                    video.stats.likes + (likedVideos.has(index) ? 1 : 0)
+                  )}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center">
+                <button className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
+                  <MessageCircle className="w-7 h-7" />
+                </button>
+                <span className="text-white text-xs font-medium mt-1">
+                  {formatNumber(video.stats.comments)}
+                </span>
+              </div>
+
+              {/* Volume Control */}
+              <div className=" ">
+                <button
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                    isMuted
+                      ? "text-white/60 hover:bg-white/10"
+                      : "text-white hover:bg-white/20"
+                  }`}
+                  onClick={toggleMute}
+                >
+                  {isMuted ? (
+                    <VolumeX className="w-7 h-7" />
+                  ) : (
+                    <Volume2 className="w-7 h-7 " />
+                  )}
+                </button>
+              </div>
+
+              {/* <div className="flex flex-col items-center">
+                <button className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
+                  <Share2 className="w-7 h-7" />
+                </button>
+                <span className="text-white text-xs font-medium mt-1">
+                  {formatNumber(video.stats.shares)}
+                </span>
+              </div> */}
+
+              {/* <button className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
+                <Bookmark className="w-7 h-7" />
+              </button> */}
+            </div>
+
+            {/* Bottom Content */}
+            <div className="absolute bottom-0 left-0 right-20 p-4 z-15">
+              <div className="flex items-center space-x-3 mb-3">
+                {/* use avater */}
+                <div className="w-14 h-14 border-2 border-white rounded-full bg-gradient-to-br from-primary to-chart-2 flex items-center justify-center text-white font-bold text-lg">
+                  {video.user.displayName[0]}
+                </div>
+                <span className="text-white font-semibold text-lg">
+                  {video.user.username}
+                </span>
+                {video.user.verified && (
+                  <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-3 h-3 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
                     >
-                      <Icon className="mr-2 h-4 w-4" />
-                      {category.name}
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 p-6">
-          {/* Hero Section */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold">Welcome back, John!</h2>
-                <p className="text-muted-foreground">
-                  Discover amazing content from creators worldwide
-                </p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filter
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  This Week
-                </Button>
-              </div>
-            </div>
-
-            {/* Featured Videos */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              {featuredVideos.map((video) => (
-                <VideoCard key={video.id} video={video} size="large" />
-              ))}
-            </div>
-          </div>
-
-          {/* Content Tabs */}
-          <Tabs defaultValue="recommended" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="recommended">Recommended</TabsTrigger>
-              <TabsTrigger value="trending">Trending</TabsTrigger>
-              <TabsTrigger value="history">Watch History</TabsTrigger>
-              <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
-            </TabsList>
-
-            {/* Recommended Tab */}
-            <TabsContent value="recommended" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Recommended for You</h3>
-                <Button variant="ghost" size="sm">
-                  <ChevronRight className="w-4 h-4 mr-2" />
-                  View All
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {recommendedVideos.map((video) => (
-                  <VideoCard key={video.id} video={video} />
-                ))}
-              </div>
-            </TabsContent>
-
-            {/* Trending Tab */}
-            <TabsContent value="trending" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <Flame className="w-5 h-5 mr-2 text-orange-500" />
-                  Trending Now
-                </h3>
-                <Badge variant="outline" className="text-xs">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  Updated hourly
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...featuredVideos, ...recommendedVideos.slice(0, 2)].map(
-                  (video) => (
-                    <VideoCard key={video.id} video={video} />
-                  )
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <span className="text-gray-300 text-sm">
+                  • {timeAgo(video.uploadedAt)}
+                </span>
+                {!followedUsers.has(video.userId) && (
+                  <button
+                    className="border border-white text-white hover:bg-white hover:text-black px-4 py-1 rounded-md text-sm font-medium ml-auto transition-colors"
+                    onClick={() => toggleFollow(video.userId)}
+                  >
+                    Follow
+                  </button>
                 )}
               </div>
-            </TabsContent>
 
-            {/* History Tab */}
-            <TabsContent value="history" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Watch History</h3>
-                <Button variant="outline" size="sm">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Clear History
-                </Button>
-              </div>
+              <p className="text-white text-sm mb-3 max-w-md leading-relaxed">
+                {video.description}
+              </p>
 
-              <div className="space-y-4">
-                {watchHistory.map((video) => (
-                  <Card
-                    key={video.id}
-                    className="hover:shadow-lg transition-shadow"
+              <div className="flex flex-wrap gap-2 mb-4">
+                {video.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="bg-white/20 text-white px-2 py-1 rounded-full text-xs font-medium hover:bg-white/30 cursor-pointer transition-colors"
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-center space-x-4">
-                        <div className="relative">
-                          <img
-                            src={video.thumbnail}
-                            alt={video.title}
-                            className="w-32 h-18 object-cover rounded-lg"
-                          />
-                          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 rounded-b-lg">
-                            <div
-                              className="h-full bg-primary rounded-b-lg"
-                              style={{ width: `${video.watchedPercentage}%` }}
-                            ></div>
-                          </div>
-                        </div>
-
-                        <div className="flex-1">
-                          <h4 className="font-semibold mb-1">{video.title}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {video.creator}
-                          </p>
-                          <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                            <span>{video.watchedPercentage}% watched</span>
-                            <span>•</span>
-                            <span>{video.lastWatched}</span>
-                          </div>
-                        </div>
-
-                        <Button variant="ghost" size="sm">
-                          <Play className="w-4 h-4 mr-2" />
-                          Continue
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    #{tag}
+                  </span>
                 ))}
               </div>
-            </TabsContent>
 
-            {/* Bookmarks Tab */}
-            <TabsContent value="bookmarks" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Saved Videos</h3>
-                <Badge variant="outline" className="text-xs">
-                  {bookmarkedVideos.size} videos
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...featuredVideos, ...recommendedVideos]
-                  .filter((video) => bookmarkedVideos.has(video.id))
-                  .map((video) => (
-                    <VideoCard key={video.id} video={video} />
-                  ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </main>
+              {/* Progress Bar */}
+              {videoProgress[index] && videoDurations[index] && (
+                <div className="mb-2">
+                  <div className="flex items-center justify-between text-white text-xs mb-1">
+                    <span>
+                      {Math.floor(
+                        (videoProgress[index].playedSeconds || 0) / 60
+                      )}
+                      :
+                      {String(
+                        Math.floor(
+                          (videoProgress[index].playedSeconds || 0) % 60
+                        )
+                      ).padStart(2, "0")}
+                    </span>
+                    <span>
+                      {Math.floor(videoDurations[index] / 60)}:
+                      {String(Math.floor(videoDurations[index] % 60)).padStart(
+                        2,
+                        "0"
+                      )}
+                    </span>
+                  </div>
+                  <div
+                    className="w-full bg-white/20 rounded-full h-1 cursor-pointer"
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const percent = (e.clientX - rect.left) / rect.width;
+                      const seekTime = percent * videoDurations[index];
+                      seekTo(index, seekTime);
+                    }}
+                  >
+                    <div
+                      className="bg-white rounded-full h-1 transition-all duration-300"
+                      style={{
+                        width: `${(videoProgress[index].played || 0) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
+
+      {/* Bottom Navigation */}
+      {/* <div className="absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-lg border-t border-gray-800 z-30">
+        <div className="flex items-center justify-around py-3">
+          <button className="flex flex-col items-center space-y-1 text-white py-2 px-4 hover:bg-white/10 rounded-lg transition-colors">
+            <Home className="w-6 h-6" />
+            <span className="text-xs">Home</span>
+          </button>
+          <button className="flex flex-col items-center space-y-1 text-gray-400 py-2 px-4 hover:bg-white/10 rounded-lg transition-colors">
+            <Search className="w-6 h-6" />
+            <span className="text-xs">Discover</span>
+          </button>
+          <button className="flex flex-col items-center space-y-1 text-gray-400 py-2 px-4 hover:bg-white/10 rounded-lg transition-colors">
+            <PlusCircle className="w-8 h-8" />
+          </button>
+          <button className="flex flex-col items-center space-y-1 text-gray-400 py-2 px-4 hover:bg-white/10 rounded-lg transition-colors">
+            <Bell className="w-6 h-6" />
+            <span className="text-xs">Inbox</span>
+          </button>
+          <button className="flex flex-col items-center space-y-1 text-gray-400 py-2 px-4 hover:bg-white/10 rounded-lg transition-colors">
+            <User className="w-6 h-6" />
+            <span className="text-xs">Profile</span>
+          </button>
+        </div>
+      </div> */}
+
+      {/* Navigation Dots */}
+      {/* <div className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20">
+        <div className="flex flex-col space-y-2">
+          {videos.map((_, index) => (
+            <button
+              key={index}
+              className={`w-1 h-8 rounded-full transition-all ${
+                index === currentVideoIndex
+                  ? "bg-white shadow-lg"
+                  : "bg-white/30 hover:bg-white/50"
+              }`}
+              onClick={() => scrollToVideo(index)}
+            />
+          ))}
+        </div>
+      </div> */}
     </div>
   );
 }

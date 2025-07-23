@@ -195,7 +195,7 @@ export default function StreamNestLanding() {
                 Sign In
               </Button>
               <Button
-                nClick={() => router.push("/auth/sigunuo")}
+                onClick={() => router.push("/auth/sigunuo")}
                 className="bg-gradient-to-r from-primary to-chart-2 hover:from-primary/90 hover:to-chart-2/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Get Started
@@ -242,10 +242,17 @@ export default function StreamNestLanding() {
                 Pricing
               </a>
               <div className="pt-2 space-y-2">
-                <Button variant="ghost" className="w-full justify-start">
+                <Button
+                  onClick={() => router.push("/auth/login")}
+                  variant="ghost"
+                  className="w-full justify-start"
+                >
                   Sign In
                 </Button>
-                <Button className="w-full bg-gradient-to-r from-primary to-chart-2 text-white">
+                <Button
+                  onClick={() => router.push("/auth/signup")}
+                  className="w-full bg-gradient-to-r from-primary to-chart-2 text-white"
+                >
                   Get Started
                   <Sparkles className="w-4 h-4 ml-2" />
                 </Button>

@@ -229,6 +229,16 @@ export default function VideoUploadPage() {
       name: videoFile.name,
       size: formatFileSize(videoFile.size),
       type: videoFile.type,
+      duration: videoFile.duration
+        ? `${Math.floor(videoFile.duration / 60)}:${(
+            videoFile.duration % 60
+          ).toFixed(0)
+            .padStart(2, "0")}`
+        : "N/A",
+      frameRate: videoFile
+      ? `${videoFile.videoWidth}x${videoFile.videoHeight}` : "N/A"
+      aspectRatio: videoFile.videoWidth && videoFile.videoHeight
+    }
     };
   };
 
@@ -1272,4 +1282,4 @@ export default function VideoUploadPage() {
       </div>
     </div>
   );
-}
+

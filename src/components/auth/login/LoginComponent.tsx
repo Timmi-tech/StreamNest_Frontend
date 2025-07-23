@@ -32,6 +32,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { loginSchema } from "@/schemas/loginSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLogin } from "@/queries/auth.queries";
+import { toast } from "sonner";
 
 export interface LoginInputs {
   email: string;
@@ -60,32 +61,39 @@ export default function LoginComponent() {
       email: data.email,
       password: data.password,
     });
-    // e.preventDefault();
-    // setIsLoading(true);
-    // // Simulate API call
-    // await new Promise((resolve) => setTimeout(resolve, 1500));
-    // setIsLoading(false);
-    // console.log("Login attempt:", { email, password, rememberMe });
   };
 
   useEffect(() => {
     if (LoginQuery.isSuccess) {
+      toast.success("Login successful!🎉");
+      setIsLoading(false);
+      // Handle successful login, e.g., store user data, redirect, etc.
       console.log("Login successful", LoginQuery.data);
-      router.push("/dashboard");
-    } else if (LoginQuery.isError) {
-      console.error("Login failed", LoginQuery.error);
+      window.location.reload();
+      // router.push("/dashboard");
     }
-  }, [
-    LoginQuery.isSuccess,
-    LoginQuery.isError,
-    LoginQuery.data,
-    LoginQuery.error,
-    router,
-  ]);
+  }, [LoginQuery.isSuccess]);
 
-  const handleSocialLogin = (provider) => {
-    console.log(`Login with ${provider}`);
-  };
+  useEffect(() => {
+    if (LoginQuery.isError) {
+      const errors =
+        LoginQuery.error?.response?.data?.errors?.Authentication.map(
+          (error) => {
+            return error;
+          }
+        );
+      toast.error(errors);
+
+      console.error(
+        "Login error",
+        LoginQuery.error?.response?.data?.errors?.Authentication
+      );
+    }
+  }, [LoginQuery.isError, LoginQuery.error]);
+
+  useEffect(() => {
+    setIsLoading(LoginQuery.isPending);
+  }, [LoginQuery.isPending]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4 relative overflow-hidden">
