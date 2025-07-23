@@ -5,7 +5,7 @@ export const getAllVideos = () => {
   return axiosInstance.get("/VideoPosts");
 };
 
-// create anew video post
+// create a new video post
 export const createVideoPost = (data) => {
   const params = {
     Title: data.title,
