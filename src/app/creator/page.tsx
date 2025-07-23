@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { LogUserOut } from "@/store/AuthStore";
 import { useRouter } from "next/navigation";
+import { useGetAllVideos } from "@/queries/video.queries";
+import VideoFeedSkeleton from "@/components/VideoFeedSkeleton";
 
 export default function HTML5VideoFeed() {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -151,6 +153,23 @@ export default function HTML5VideoFeed() {
     },
   ];
 
+  const AllVideos = useGetAllVideos();
+
+  useEffect(() => {
+    if (AllVideos.isSuccess) {
+      console.log(AllVideos);
+      console.log(AllVideos.data?.length);
+    }
+  }, [AllVideos.isSuccess]);
+
+  useEffect(() => {
+    AllVideos.isError && console.log(AllVideos.error);
+  }, [AllVideos.isError]);
+
+  useEffect(() => {
+    AllVideos.isPending && console.log("loading");
+  }, [AllVideos.isPending]);
+
   const formatNumber = (num) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
@@ -243,12 +262,12 @@ export default function HTML5VideoFeed() {
     }
 
     // Load next video (for smooth forward scroll)
-    if (centerIndex < videos.length - 1) {
+    if (centerIndex < AllVideos.data?.length - 1) {
       toLoad.add(centerIndex + 1);
     }
 
     // Optional: Load one more ahead for very smooth experience
-    if (centerIndex < videos.length - 2) {
+    if (centerIndex < AllVideos.data?.length - 2) {
       toLoad.add(centerIndex + 2);
     }
 
@@ -262,7 +281,7 @@ export default function HTML5VideoFeed() {
     const itemHeight = container.clientHeight;
     const newIndex = Math.round(scrollTop / itemHeight);
 
-    if (newIndex !== currentVideoIndex && newIndex < videos.length) {
+    if (newIndex !== currentVideoIndex && newIndex < AllVideos.data?.length) {
       // Pause current video
       pauseVideo(currentVideoIndex);
 
@@ -320,7 +339,7 @@ export default function HTML5VideoFeed() {
     console.log(`🏁 Video ${index} ended`);
     setVideoStates((prev) => ({ ...prev, [index]: "ended" }));
     if (index === currentVideoIndex) {
-      if (index < videos.length - 1) {
+      if (index < AllVideos.data?.length - 1) {
         scrollToVideo(index + 1);
       } else {
         scrollToVideo(0);
@@ -405,6 +424,8 @@ export default function HTML5VideoFeed() {
     });
   }, [volume, isMuted]);
 
+  if (AllVideos.isPending) return <VideoFeedSkeleton />;
+
   return (
     <div className="h-screen bg-black relative overflow-hidden">
       {/* Enhanced Debug Info */}
@@ -464,105 +485,109 @@ export default function HTML5VideoFeed() {
         onScroll={handleScroll}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {videos.map((video, index) => (
-          <div
-            key={video.id}
-            className="h-screen w-full snap-start relative bg-black"
-          >
-            {/* Lazy Loaded HTML5 Video */}
-            <div className="absolute inset-0">
-              {videosToLoad.has(index) ? (
-                // Load video only when needed
-                <video
-                  ref={(el) => (videoRefs.current[index] = el)}
-                  src={video.videoUrl}
-                  className="w-full h-full object-cover"
-                  muted={isMuted}
-                  loop
-                  playsInline
-                  preload="metadata" // Only load metadata initially
-                  webkit-playsinline="true"
-                  onLoadedData={() => handleVideoLoaded(index)}
-                  onLoadStart={() => {
-                    console.log(`📥 Video ${index} loading started`);
-                    setVideoStates((prev) => ({ ...prev, [index]: "loading" }));
-                  }}
-                  onCanPlay={() => {
-                    console.log(`✅ Video ${index} can play`);
-                    setVideoStates((prev) => ({ ...prev, [index]: "ready" }));
-                  }}
-                  onPlay={() => handleVideoPlay(index)}
-                  onPause={() => handleVideoPause(index)}
-                  onEnded={() => handleVideoEnded(index)}
-                  onTimeUpdate={(e) => handleVideoProgress(index, e)}
-                  onDurationChange={(e) => handleVideoDuration(index, e)}
-                  onError={(e) => handleVideoError(index, e.target.error)}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    backgroundColor: "#000",
-                  }}
-                />
-              ) : (
-                // Placeholder for unloaded videos
-                <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                  <div className="text-white/60 text-center">
-                    <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-3 mx-auto">
-                      <Play className="w-8 h-8 text-white/40" />
+        {AllVideos.data?.length > 0 &&
+          AllVideos.data?.map((video, index) => (
+            <div
+              key={video.id}
+              className="h-screen w-full snap-start relative bg-black"
+            >
+              {/* Lazy Loaded HTML5 Video */}
+              <div className="absolute inset-0">
+                {videosToLoad.has(index) ? (
+                  // Load video only when needed
+                  <video
+                    ref={(el) => (videoRefs.current[index] = el)}
+                    src={video.videoUrl}
+                    className="w-full h-full object-cover"
+                    muted={isMuted}
+                    loop
+                    playsInline
+                    preload="metadata" // Only load metadata initially
+                    webkit-playsinline="true"
+                    onLoadedData={() => handleVideoLoaded(index)}
+                    onLoadStart={() => {
+                      console.log(`📥 Video ${index} loading started`);
+                      setVideoStates((prev) => ({
+                        ...prev,
+                        [index]: "loading",
+                      }));
+                    }}
+                    onCanPlay={() => {
+                      console.log(`✅ Video ${index} can play`);
+                      setVideoStates((prev) => ({ ...prev, [index]: "ready" }));
+                    }}
+                    onPlay={() => handleVideoPlay(index)}
+                    onPause={() => handleVideoPause(index)}
+                    onEnded={() => handleVideoEnded(index)}
+                    onTimeUpdate={(e) => handleVideoProgress(index, e)}
+                    onDurationChange={(e) => handleVideoDuration(index, e)}
+                    onError={(e) => handleVideoError(index, e.target.error)}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      backgroundColor: "#000",
+                    }}
+                  />
+                ) : (
+                  // Placeholder for unloaded videos
+                  <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+                    <div className="text-white/60 text-center">
+                      <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-3 mx-auto">
+                        <Play className="w-8 h-8 text-white/40" />
+                      </div>
+                      <div className="text-sm font-medium">{video.title}</div>
+                      <div className="text-xs mt-1">Scroll to load video</div>
                     </div>
-                    <div className="text-sm font-medium">{video.title}</div>
-                    <div className="text-xs mt-1">Scroll to load video</div>
+                  </div>
+                )}
+
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none z-5" />
+              </div>
+
+              {/* Loading State - Only show for videos that should be loading */}
+              {videosToLoad.has(index) && !loadedVideos.has(index) && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                    <span className="text-white text-sm">
+                      Loading {video.title}...
+                    </span>
+                    <div className="text-white/60 text-xs text-center max-w-xs">
+                      Video {index + 1} of {AllVideos.data?.length}
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none z-5" />
-            </div>
-
-            {/* Loading State - Only show for videos that should be loading */}
-            {videosToLoad.has(index) && !loadedVideos.has(index) && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-                  <span className="text-white text-sm">
-                    Loading {video.title}...
-                  </span>
-                  <div className="text-white/60 text-xs text-center max-w-xs">
-                    Video {index + 1} of {videos.length}
-                  </div>
+              {/* Play/Pause Overlay - Only show for loaded videos */}
+              {videosToLoad.has(index) && (
+                <div
+                  className="absolute inset-0 flex items-center justify-center z-10"
+                  onClick={togglePlayPause}
+                >
+                  {!isPlaying &&
+                    index === currentVideoIndex &&
+                    loadedVideos.has(index) && (
+                      <div className="bg-black/60 rounded-full p-6 animate-pulse">
+                        <Play className="w-16 h-16 text-white fill-white" />
+                      </div>
+                    )}
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Play/Pause Overlay - Only show for loaded videos */}
-            {videosToLoad.has(index) && (
-              <div
-                className="absolute inset-0 flex items-center justify-center z-10"
-                onClick={togglePlayPause}
-              >
-                {!isPlaying &&
-                  index === currentVideoIndex &&
-                  loadedVideos.has(index) && (
-                    <div className="bg-black/60 rounded-full p-6 animate-pulse">
-                      <Play className="w-16 h-16 text-white fill-white" />
-                    </div>
-                  )}
-              </div>
-            )}
-
-            {/* Right Side Actions */}
-            <div className="absolute right-4 bottom-5 flex flex-col items-center space-y-6 z-20">
-              {/* User Avatar */}
-              <div className="relative">
-                {/* <div className="w-14 h-14 border-2 border-white rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
+              {/* Right Side Actions */}
+              <div className="absolute right-4 bottom-5 flex flex-col items-center space-y-6 z-20">
+                {/* User Avatar */}
+                <div className="relative">
+                  {/* <div className="w-14 h-14 border-2 border-white rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
                   {video.user.displayName[0]}
                 </div> */}
-                {/* {!followedUsers.has(video.userId) && (
+                  {/* {!followedUsers.has(video.userId) && (
                   <button
                     className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-colors"
                     onClick={() => toggleFollow(video.userId)}
@@ -570,57 +595,57 @@ export default function HTML5VideoFeed() {
                     <PlusCircle className="w-4 h-4 text-white" />
                   </button>
                 )} */}
-              </div>
+                </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col items-center">
-                <button
-                  className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
-                  onClick={() => toggleLike(video.id, index)}
-                >
-                  <Heart
-                    className={`w-7 h-7 transition-colors ${
-                      likedVideos.has(index)
-                        ? "fill-red-500 text-red-500"
-                        : "text-white hover:text-red-300"
-                    }`}
-                  />
-                </button>
-                <span className="text-white text-xs font-medium mt-1">
-                  {formatNumber(
+                {/* Action Buttons */}
+                <div className="flex flex-col items-center">
+                  <button
+                    className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+                    onClick={() => toggleLike(video.id, index)}
+                  >
+                    <Heart
+                      className={`w-7 h-7 transition-colors ${
+                        likedVideos.has(index)
+                          ? "fill-red-500 text-red-500"
+                          : "text-white hover:text-red-300"
+                      }`}
+                    />
+                  </button>
+                  <span className="text-white text-xs font-medium mt-1">
+                    {/* {formatNumber(
                     video.stats.likes + (likedVideos.has(index) ? 1 : 0)
-                  )}
-                </span>
-              </div>
+                  )} */}
+                  </span>
+                </div>
 
-              <div className="flex flex-col items-center">
-                <button className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
-                  <MessageCircle className="w-7 h-7" />
-                </button>
-                <span className="text-white text-xs font-medium mt-1">
-                  {formatNumber(video.stats.comments)}
-                </span>
-              </div>
+                <div className="flex flex-col items-center">
+                  <button className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
+                    <MessageCircle className="w-7 h-7" />
+                  </button>
+                  <span className="text-white text-xs font-medium mt-1">
+                    {/* {formatNumber(video.stats.comments)} */}
+                  </span>
+                </div>
 
-              {/* Volume Control */}
-              <div className=" ">
-                <button
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                    isMuted
-                      ? "text-white/60 hover:bg-white/10"
-                      : "text-white hover:bg-white/20"
-                  }`}
-                  onClick={toggleMute}
-                >
-                  {isMuted ? (
-                    <VolumeX className="w-7 h-7" />
-                  ) : (
-                    <Volume2 className="w-7 h-7 " />
-                  )}
-                </button>
-              </div>
+                {/* Volume Control */}
+                <div className=" ">
+                  <button
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                      isMuted
+                        ? "text-white/60 hover:bg-white/10"
+                        : "text-white hover:bg-white/20"
+                    }`}
+                    onClick={toggleMute}
+                  >
+                    {isMuted ? (
+                      <VolumeX className="w-7 h-7" />
+                    ) : (
+                      <Volume2 className="w-7 h-7 " />
+                    )}
+                  </button>
+                </div>
 
-              {/* <div className="flex flex-col items-center">
+                {/* <div className="flex flex-col items-center">
                 <button className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
                   <Share2 className="w-7 h-7" />
                 </button>
@@ -629,22 +654,24 @@ export default function HTML5VideoFeed() {
                 </span>
               </div> */}
 
-              {/* <button className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
+                {/* <button className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
                 <Bookmark className="w-7 h-7" />
               </button> */}
-            </div>
+              </div>
 
-            {/* Bottom Content */}
-            <div className="absolute bottom-0 left-0 right-20 p-4 z-15">
-              <div className="flex items-center space-x-3 mb-3">
-                {/* use avater */}
-                <div className="w-14 h-14 border-2 border-white rounded-full bg-gradient-to-br from-primary to-chart-2 flex items-center justify-center text-white font-bold text-lg">
-                  {video.user.displayName[0]}
-                </div>
-                <span className="text-white font-semibold text-lg">
-                  {video.user.username}
-                </span>
-                {video.user.verified && (
+              {/* Bottom Content */}
+              <div className="absolute bottom-0 left-0 right-20 p-4 z-15">
+                <div className="flex items-center space-x-3 mb-3">
+                  {/* use avater */}
+                  <div className="w-14 h-14 border-2 border-white rounded-full bg-gradient-to-br from-primary to-chart-2 flex items-center justify-center text-white font-bold text-lg">
+                    T{/* {video.user.displayName[0]} */}
+                  </div>
+                  <span className="text-white font-semibold text-lg">
+                    Test user
+                    {/* {video.user.username} */}
+                  </span>
+                  {/* user verified */}
+                  {/* {video.user.verified && (
                   <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
                     <svg
                       className="w-3 h-3 text-white"
@@ -658,11 +685,11 @@ export default function HTML5VideoFeed() {
                       />
                     </svg>
                   </div>
-                )}
-                {/* <span className="text-gray-300 text-sm">
+                )} */}
+                  {/* <span className="text-gray-300 text-sm">
                   • {timeAgo(video.uploadedAt)}
                 </span> */}
-                {/* {!followedUsers.has(video.userId) && (
+                  {/* {!followedUsers.has(video.userId) && (
                   <button
                     className="border border-white text-white hover:bg-white hover:text-black px-4 py-1 rounded-md text-sm font-medium ml-auto transition-colors"
                     onClick={() => toggleFollow(video.userId)}
@@ -670,67 +697,66 @@ export default function HTML5VideoFeed() {
                     Follow
                   </button>
                 )} */}
-              </div>
-
-              <p className="text-white text-sm mb-3 max-w-md leading-relaxed">
-                {video.description}
-              </p>
-
-              <div className="flex flex-wrap gap-2 mb-4">
-                {video.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="bg-white/20 text-white px-2 py-1 rounded-full text-xs font-medium hover:bg-white/30 cursor-pointer transition-colors"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-
-              {/* Progress Bar */}
-              {videoProgress[index] && videoDurations[index] && (
-                <div className="mb-2">
-                  <div className="flex items-center justify-between text-white text-xs mb-1">
-                    <span>
-                      {Math.floor(
-                        (videoProgress[index].playedSeconds || 0) / 60
-                      )}
-                      :
-                      {String(
-                        Math.floor(
-                          (videoProgress[index].playedSeconds || 0) % 60
-                        )
-                      ).padStart(2, "0")}
-                    </span>
-                    <span>
-                      {Math.floor(videoDurations[index] / 60)}:
-                      {String(Math.floor(videoDurations[index] % 60)).padStart(
-                        2,
-                        "0"
-                      )}
-                    </span>
-                  </div>
-                  <div
-                    className="w-full bg-white/20 rounded-full h-1 cursor-pointer"
-                    onClick={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const percent = (e.clientX - rect.left) / rect.width;
-                      const seekTime = percent * videoDurations[index];
-                      seekTo(index, seekTime);
-                    }}
-                  >
-                    <div
-                      className="bg-white rounded-full h-1 transition-all duration-300"
-                      style={{
-                        width: `${(videoProgress[index].played || 0) * 100}%`,
-                      }}
-                    />
-                  </div>
                 </div>
-              )}
+
+                <p className="text-white text-sm mb-3 max-w-md leading-relaxed">
+                  {video.description}
+                </p>
+
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {video.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="bg-white/20 text-white px-2 py-1 rounded-full text-xs font-medium hover:bg-white/30 cursor-pointer transition-colors"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Progress Bar */}
+                {videoProgress[index] && videoDurations[index] && (
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between text-white text-xs mb-1">
+                      <span>
+                        {Math.floor(
+                          (videoProgress[index].playedSeconds || 0) / 60
+                        )}
+                        :
+                        {String(
+                          Math.floor(
+                            (videoProgress[index].playedSeconds || 0) % 60
+                          )
+                        ).padStart(2, "0")}
+                      </span>
+                      <span>
+                        {Math.floor(videoDurations[index] / 60)}:
+                        {String(
+                          Math.floor(videoDurations[index] % 60)
+                        ).padStart(2, "0")}
+                      </span>
+                    </div>
+                    <div
+                      className="w-full bg-white/20 rounded-full h-1 cursor-pointer"
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const percent = (e.clientX - rect.left) / rect.width;
+                        const seekTime = percent * videoDurations[index];
+                        seekTo(index, seekTime);
+                      }}
+                    >
+                      <div
+                        className="bg-white rounded-full h-1 transition-all duration-300"
+                        style={{
+                          width: `${(videoProgress[index].played || 0) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
 
       {/* Bottom Navigation */}

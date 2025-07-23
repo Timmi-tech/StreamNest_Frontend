@@ -82,7 +82,7 @@ export default function LoginComponent() {
             return error;
           }
         );
-      toast.error(errors);
+      toast.error(errors || "There was an error while trying to login");
 
       console.error(
         "Login error",

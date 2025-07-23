@@ -1,16 +1,20 @@
+import { useCreateVideoPosts } from "@/queries/video.queries";
+import { getUploadStatus } from "@/store/VideoUpload";
 import { ArrowLeft, Loader2, Plus, Tag, Upload, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export const UploadVideoComponent = ({ view, setView }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [MAX_FILE_SIZE_MB] = useState(300);
 
   // Upload form state
   const [uploadData, setUploadData] = useState({
     title: "",
     description: "",
-    genre: "",
-    ageRating: "General",
+    genre: "Other",
+    ageRating: "Restricted",
     videoYear: new Date().getFullYear(),
     tags: [],
     videoFile: null,
@@ -21,6 +25,8 @@ export const UploadVideoComponent = ({ view, setView }) => {
 
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
+
+  const UploadVideo = useCreateVideoPosts();
 
   // Mock user videos data
   const [userVideos, setUserVideos] = useState([
@@ -86,26 +92,24 @@ export const UploadVideoComponent = ({ view, setView }) => {
     },
   ]);
 
-  const genres = [
-    "Technology",
-    "Education",
-    "Entertainment",
-    "Music",
-    "Gaming",
-    "News",
-    "Sports",
-    "Lifestyle",
-    "Travel",
-    "Cooking",
-  ];
+  const genres = ["Comedy", "Music", "Sports", "Drama", "Tutorial", "Other"];
 
-  const ageRatings = ["General", "Teen", "Mature", "Adult"];
+  const ageRatings = ["Everyone", "Teens", "Mature", "Restricted"];
 
   const handleVideoUpload = (file) => {
     if (file && file.type.startsWith("video/")) {
-      setUploadData((prev) => ({ ...prev, videoFile: file }));
-      const url = URL.createObjectURL(file);
-      setVideoPreview(url);
+      const fileSizeMB = file.size / (1024 * 1024); // Convert bytes to MB
+      if (fileSizeMB > MAX_FILE_SIZE_MB) {
+        toast.error("Whoa that video is huge😮", {
+          description:
+            "Uploaded videos must not exceed a maximum size of 300MB.",
+        });
+      } else {
+        setUploadData((prev) => ({ ...prev, videoFile: file }));
+        const url = URL.createObjectURL(file);
+        console.log(url);
+        setVideoPreview(url);
+      }
     }
   };
 
@@ -147,16 +151,30 @@ export const UploadVideoComponent = ({ view, setView }) => {
     }));
   };
 
+  const uploadStatus = getUploadStatus();
+  useEffect(() => {
+    console.log(uploadStatus);
+  }, [uploadProgress]);
+
   const handleUpload = async () => {
     if (!uploadData.title || !uploadData.genre || !uploadData.videoFile) return;
+    console.log(uploadData);
+
+    // const uploadProgress = getUploadStatus();
 
     setIsUploading(true);
+    const promise = UploadVideo.mutateAsync(uploadData);
 
-    // Simulate upload progress
-    for (let i = 0; i <= 100; i += 10) {
-      setUploadProgress(i);
-      await new Promise((resolve) => setTimeout(resolve, 300));
-    }
+    toast.promise(promise, {
+      loading: "Loading...",
+      success: (data) => {
+        return `Your video has been Uploaded🎉`;
+      },
+      error: "Error Uploading Video Pleas try again",
+    });
+
+    // setUploadProgress(uploadProgress);
+    // console.log(uploadProgress);
 
     // Add new video to the list
     const newVideo = {
@@ -185,7 +203,7 @@ export const UploadVideoComponent = ({ view, setView }) => {
       title: "",
       description: "",
       genre: "",
-      ageRating: "General",
+      ageRating: "",
       videoYear: new Date().getFullYear(),
       tags: [],
       videoFile: null,
@@ -193,8 +211,27 @@ export const UploadVideoComponent = ({ view, setView }) => {
     setVideoPreview(null);
     setIsUploading(false);
     setUploadProgress(0);
-    setView("dashboard");
+    // setView("dashboard");
   };
+
+  //   useEffect(() => {
+  //     if (UploadVideo.isSuccess) {
+  //       toast.success("Video Uploaded Successfully🎉");
+  //       //   setView("dashboard");
+  //     }
+  //   }, [UploadVideo.isSuccess]);
+
+  //   useEffect(() => {
+  //     if (UploadVideo.isError) {
+  //       toast.error("Error uploading Video. Please try again");
+  //     }
+  //   }, [UploadVideo.isError]);
+
+  //   useEffect(() => {
+  //     if (UploadVideo.isPending) {
+  //       toast.info("Uploading video");
+  //     }
+  //   }, [UploadVideo.isPending]);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -220,14 +257,12 @@ export const UploadVideoComponent = ({ view, setView }) => {
             <button
               onClick={handleUpload}
               disabled={
-                !uploadData.title ||
-                !uploadData.genre ||
-                !uploadData.videoFile ||
-                isUploading
+                !uploadData.title || !uploadData.genre || !uploadData.videoFile
+                // isUploading
               }
               className="px-6 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:opacity-50 text-white text-sm font-medium rounded-full transition-colors flex items-center space-x-2"
             >
-              {isUploading ? (
+              {false ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Uploading...</span>

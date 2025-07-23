@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import Cookies from "js-cookie";
 import { access } from "fs";
+import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -67,6 +68,7 @@ export const useAuthStore = create<AuthState>()(
         Cookies.remove("refreshToken");
         Cookies.remove("accessToken");
         Cookies.remove("user-role");
+        window.location.href = "/auth/login";
         set({ user: null, isAuthenticated: false });
       },
     }),

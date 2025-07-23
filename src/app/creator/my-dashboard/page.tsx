@@ -29,6 +29,7 @@ import {
 import { UploadVideoComponent } from "@/components/creator/UploadVideoComponent";
 import { useRouter } from "next/navigation";
 import { LogUserOut } from "@/store/AuthStore";
+import { useGetAllVideos } from "@/queries/video.queries";
 
 export default function CreatorDashboard() {
   const [view, setView] = useState("dashboard"); // dashboard, upload
@@ -123,6 +124,8 @@ export default function CreatorDashboard() {
     },
   ]);
 
+  useEffect(() => {});
+
   const genres = [
     "Technology",
     "Education",
@@ -135,8 +138,6 @@ export default function CreatorDashboard() {
     "Travel",
     "Cooking",
   ];
-
-  const ageRatings = ["General", "Teen", "Mature", "Adult"];
 
   const formatNumber = (num) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -162,93 +163,6 @@ export default function CreatorDashboard() {
       const url = URL.createObjectURL(file);
       setVideoPreview(url);
     }
-  };
-
-  const handleDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    const files = e.dataTransfer.files;
-    if (files && files[0]) {
-      handleVideoUpload(files[0]);
-    }
-  };
-
-  const addTag = () => {
-    if (newTag.trim() && !uploadData.tags.includes(newTag.trim())) {
-      setUploadData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()],
-      }));
-      setNewTag("");
-    }
-  };
-
-  const removeTag = (tagToRemove) => {
-    setUploadData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }));
-  };
-
-  const handleUpload = async () => {
-    if (!uploadData.title || !uploadData.genre || !uploadData.videoFile) return;
-
-    setIsUploading(true);
-
-    // Simulate upload progress
-    for (let i = 0; i <= 100; i += 10) {
-      setUploadProgress(i);
-      await new Promise((resolve) => setTimeout(resolve, 300));
-    }
-
-    // Add new video to the list
-    const newVideo = {
-      id: Date.now().toString(),
-      title: uploadData.title,
-      description: uploadData.description,
-      genre: uploadData.genre,
-      ageRating: uploadData.ageRating,
-      videoUrl: videoPreview,
-      videoYear: uploadData.videoYear,
-      uploadedAt: new Date().toISOString(),
-      userId: "user123",
-      tags: uploadData.tags,
-      stats: {
-        views: 0,
-        likes: 0,
-        comments: 0,
-        shares: 0,
-      },
-    };
-
-    setUserVideos((prev) => [newVideo, ...prev]);
-
-    // Reset form
-    setUploadData({
-      title: "",
-      description: "",
-      genre: "",
-      ageRating: "General",
-      videoYear: new Date().getFullYear(),
-      tags: [],
-      videoFile: null,
-    });
-    setVideoPreview(null);
-    setIsUploading(false);
-    setUploadProgress(0);
-    setView("dashboard");
   };
 
   const handleDeleteVideo = async (videoId) => {

@@ -1,8 +1,14 @@
+import {
+  getUploadProgress,
+  setUploadProgress,
+  setUploadStatus,
+} from "@/store/VideoUpload";
 import { axiosInstance } from "./axios";
 
 // get all videos
-export const getAllVideos = () => {
-  return axiosInstance.get("/VideoPosts");
+export const getAllVideos = async () => {
+  const response = await axiosInstance.get("/VideoPosts");
+  return response.data;
 };
 
 // create a new video post
@@ -11,12 +17,22 @@ export const createVideoPost = (data) => {
     Title: data.title,
     Description: data.description,
     Genre: data.genre,
-    AgeRating: data.AgeRating,
-    VideoYear: data.VideoYear,
-    VideoFile: data.VideoFile,
-    Tags: data.Tags,
+    AgeRating: data.ageRating,
+    VideoYear: data.videoYear,
+    Tags: data.tags,
+    VideoFile: data.videoFile,
   };
-  return axiosInstance.post("/VideosPosts", params);
+  console.log(params);
+
+  try {
+    const response = axiosInstance.post("/VideoPosts", params, {
+      headers: { "Content-Type": "multipart/form-data" }, // optional — Axios usually sets this automatically
+    });
+    console.log(response);
+    return response;
+  } catch (error) {
+    console.error("Upload failed:", error);
+  }
 };
 
 // get video by id
@@ -33,3 +49,12 @@ export const deleteVideoByID = (id) => {
 export const getMyVideos = () => {
   return axiosInstance.get(`/VideoPosts/me`);
 };
+
+// {
+//       onUploadProgress: (progressEvent) => {
+//         const percent = Math.round(
+//           (progressEvent.loaded * 100) / progressEvent.total
+//         );
+//         setUploadProgress(percent); // update your progress state
+//       },
+//     }

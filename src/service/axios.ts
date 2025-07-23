@@ -1,12 +1,14 @@
-import { clearTokens, getAccessToken, setAccessToken } from "@/store/AuthStore";
+import {
+  clearTokens,
+  getAccessToken,
+  LogUserOut,
+  setAccessToken,
+} from "@/store/AuthStore";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 
 export const axiosInstance = axios.create({
   baseURL: "https://streamnest-880k.onrender.com/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
   withCredentials: true,
 });
 
@@ -27,10 +29,13 @@ axiosInstance.interceptors.response.use(
       try {
         const token = Cookies.get("accessToken");
         const RefreshToken = Cookies.get("refreshToken");
-        const res = await axios.post("/token/refresh", {
-          accessToken: token,
-          refreshToken: RefreshToken,
-        });
+        const res = await axios.post(
+          "https://streamnest-880k.onrender.com/api/token/refresh",
+          {
+            accessToken: token,
+            refreshToken: RefreshToken,
+          }
+        );
         const { accessToken } = res.data;
 
         setAccessToken(accessToken);
@@ -38,6 +43,7 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (err) {
         clearTokens();
+        LogUserOut();
         return Promise.reject(err);
       }
     }

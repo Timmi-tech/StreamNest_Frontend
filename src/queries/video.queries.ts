@@ -11,7 +11,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 export const useGetAllVideos = () => {
   return useQuery({
     queryKey: ["get-all-videos"],
-    queryFn: () => getAllVideos(),
+    queryFn: async () => {
+      const response = await getAllVideos();
+      console.log(response.data);
+      return response;
+    },
   });
 };
 
