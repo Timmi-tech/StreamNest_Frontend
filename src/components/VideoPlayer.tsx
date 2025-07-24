@@ -70,7 +70,10 @@ export const VideoPlayer = ({
   } = useVideoPlayer({ AllVideos });
 
   return (
-    <div className="h-screen bg-black relative overflow-hidden">
+    <div
+      className="bg-black relative overflow-hidden"
+      style={{ height: "calc(var(--vh, 1vh) * 100)" }}
+    >
       {/* Enhanced Debug Info */}
       {/* <div className="absolute top-4 left-4 z-50 bg-black/90 text-white p-3 rounded text-xs max-w-sm">
         <div className="font-bold mb-2">Lazy Loading Debug:</div>
@@ -101,11 +104,13 @@ export const VideoPlayer = ({
               </div>
             </button>
             <div className="">
-              <h1 className="text-white text-lg font-bold">StreamNest</h1>
+              <h1 className="text-white text:md md:text-lg font-bold">
+                StreamNest
+              </h1>
               {user && user.role == "Creator" ? (
-                <p className="text-white">Creator</p>
+                <p className="text-white text-sm">Creator</p>
               ) : (
-                <p className="text-white font-bold">
+                <p className="text-white font-bold  text-sm">
                   Hello {user?.firstname} 😀
                 </p>
               )}
@@ -119,7 +124,7 @@ export const VideoPlayer = ({
             {user && user.role == "Creator" ? (
               <button
                 onClick={() => router.push("creator/my-dashboard")}
-                className="text-black p-1 px-4 bg-white hover:bg-white/10 rounded-full"
+                className="text-black p-1 px-4 bg-white hover:border-primary rounded-full"
               >
                 Dashboard
                 {/* <LogOut className="w-6 h-6" /> */}
@@ -127,7 +132,7 @@ export const VideoPlayer = ({
             ) : (
               <button
                 onClick={handleLogOut}
-                className="text-black p-1 px-4 bg-white hover:bg-white/10 rounded-full"
+                className="text-black p-1 px-4 bg-white hover:border-primary rounded-full"
               >
                 Log out
                 {/* <LogOut className="w-6 h-6" /> */}

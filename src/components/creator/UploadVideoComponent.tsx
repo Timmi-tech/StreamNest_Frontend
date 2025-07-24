@@ -1,6 +1,7 @@
 import { useCreateVideoPosts } from "@/queries/video.queries";
 import { getUploadStatus } from "@/store/VideoUpload";
 import { ArrowLeft, Loader2, Plus, Tag, Upload, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -8,6 +9,8 @@ export const UploadVideoComponent = ({ view, setView }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [MAX_FILE_SIZE_MB] = useState(300);
+
+  const router = useRouter();
 
   // Upload form state
   const [uploadData, setUploadData] = useState({
@@ -166,8 +169,9 @@ export const UploadVideoComponent = ({ view, setView }) => {
     const promise = UploadVideo.mutateAsync(uploadData);
 
     toast.promise(promise, {
-      loading: "Loading...",
+      loading: "Uploading Video...",
       success: (data) => {
+        router.back();
         return `Your video has been Uploaded🎉`;
       },
       error: "Error Uploading Video Pleas try again",
