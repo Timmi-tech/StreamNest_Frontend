@@ -6,16 +6,6 @@ export const useAllVideos = () => {
   const AllVideos = useGetAllVideos();
 
   useEffect(() => {
-    if (AllVideos.isSuccess) {
-      console.log(AllVideos);
-      console.log(AllVideos.data?.length);
-      toast.info("Video muted? ", {
-        description: "Click the Unmute button at the bottom of the Screen😉",
-      });
-    }
-  }, [AllVideos.isSuccess]);
-
-  useEffect(() => {
     if (AllVideos.isError) {
       console.log(AllVideos.error);
       toast.error("Error Loading videos😢", {

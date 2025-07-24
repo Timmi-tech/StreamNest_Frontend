@@ -2,7 +2,6 @@ import { useVideoPlayer } from "@/hooks/useVideoPlayer";
 import { getUser, LogUserOut } from "@/store/AuthStore";
 import { UseQueryResult } from "@tanstack/react-query";
 import {
-  ArrowLeft,
   Heart,
   MessageCircle,
   Play,
@@ -11,23 +10,24 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import CommentSection from "./CommentSection";
 
 export const VideoPlayer = ({
   AllVideos,
-  setView,
-  view,
 }: {
-  AllVideos: UseQueryResult<any, Error>;
-  setView?: Dispatch<SetStateAction<string>>;
-  view?: string;
+  // AllVideos: UseQueryResult<any, Error> | [{}];
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const render = "once";
+
+  useEffect(() => {
+    // console.log(AllVideos);
+  }, []);
   // log user out
+
   const handleLogOut = () => {
     LogUserOut();
     console.log("logged out");
@@ -44,7 +44,6 @@ export const VideoPlayer = ({
     // ref
     containerRef,
     videoRefs,
-
     // stateActions
     setVolume,
     setVideoStates,
@@ -102,71 +101,48 @@ export const VideoPlayer = ({
       <div className="absolute top-0 left-0 right-0 z-30 bg-gradient-to-b from-black/80 to-transparent">
         <div className="flex items-center justify-between p-4 pt-5">
           <div className="flex items-center space-x-4">
-            {view != "video" ? (
-              <button className="text-white p-2 hover:bg-white/10 rounded-full">
-                <div className="relative">
-                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-chart-2 rounded-xl flex items-center justify-center">
-                    <Video
-                      onClick={() => setView && setView("dashboard")}
-                      className="w-6 h-6 text-white"
-                    />
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse"></div>
+            <button className="text-white p-2 hover:bg-white/10 rounded-full">
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-chart-2 rounded-xl flex items-center justify-center">
+                  <Video className="w-6 h-6 text-white" />
                 </div>
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={() => setView("dashboard")}
-                  className="p-2 hover:bg-white/10 rounded-full transition-colors"
-                >
-                  <ArrowLeft className="w-8 h-8 cursor-pointer text-white" />
-                </button>
-              </>
-            )}
-
-            {view != "video" && (
-              <div className="">
-                <h1 className="text-white text:md md:text-lg font-bold">
-                  StreamNest
-                </h1>
-                {user && user.role == "Creator" ? (
-                  <p className="text-white text-sm">Creator</p>
-                ) : (
-                  <p className="text-white font-bold  text-sm">
-                    Hello {user?.firstname} 😀
-                  </p>
-                )}
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse"></div>
               </div>
-            )}
+            </button>
+            <div className="">
+              <h1 className="text-white text:md md:text-lg font-bold">
+                StreamNest
+              </h1>
+              {user && user.role == "Creator" ? (
+                <p className="text-white text-sm">Creator</p>
+              ) : (
+                <p className="text-white font-bold  text-sm">
+                  Hello {user?.firstname} 😀
+                </p>
+              )}
+            </div>
           </div>
           {/* search and more */}
           <div className="flex items-center space-x-2">
             {/* <button className="text-white p-2 hover:bg-white/10 rounded-full">
               <Search className="w-6 h-6" />
             </button> */}
-            {/* this check if the video is rendering in the user dashboard vie video if it is it dosent return the buttons */}
-            {/* if its not then it check the user role and renders the required button */}
-            {view != "video" ? (
-              (user && user.role) == "Creator" ? (
-                <button
-                  onClick={() => router.push("creator/my-dashboard")}
-                  className="text-black p-1 px-4 bg-white hover:border-primary rounded-full"
-                >
-                  Dashboard
-                  {/* <LogOut className="w-6 h-6" /> */}
-                </button>
-              ) : (
-                <button
-                  onClick={handleLogOut}
-                  className="text-black p-1 px-4 bg-white hover:border-primary rounded-full"
-                >
-                  Log out
-                  {/* <LogOut className="w-6 h-6" /> */}
-                </button>
-              )
+            {user && user.role == "Creator" ? (
+              <button
+                onClick={() => router.push("creator/my-dashboard")}
+                className="text-black p-1 px-4 bg-white hover:border-primary rounded-full"
+              >
+                Dashboard
+                {/* <LogOut className="w-6 h-6" /> */}
+              </button>
             ) : (
-              ""
+              <button
+                onClick={handleLogOut}
+                className="text-black p-1 px-4 bg-white hover:border-primary rounded-full"
+              >
+                Log out
+                {/* <LogOut className="w-6 h-6" /> */}
+              </button>
             )}
           </div>
         </div>
@@ -191,7 +167,7 @@ export const VideoPlayer = ({
                   // Load video only when needed
                   <video
                     ref={(el) => (videoRefs.current[index] = el)}
-                    src={video?.videoUrl}
+                    src={video.videoUrl}
                     className="w-full h-full object-cover"
                     muted={isMuted}
                     loop

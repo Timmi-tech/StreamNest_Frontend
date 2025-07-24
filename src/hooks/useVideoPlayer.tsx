@@ -1,6 +1,7 @@
 import { UseQueryResult } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export const useVideoPlayer = ({
   AllVideos,

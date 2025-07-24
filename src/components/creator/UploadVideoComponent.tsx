@@ -336,7 +336,7 @@ export const UploadVideoComponent = ({ view, setView }) => {
                   className="hidden"
                 />
                 <div className="mt-6 text-xs text-gray-500 space-y-1">
-                  <p>MP4, MOV, AVI, WebM up to 10GB</p>
+                  <p>MP4, MOV, AVI, WebM up to 300MB</p>
                   <p>Vertical videos work best</p>
                 </div>
               </div>

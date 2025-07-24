@@ -46,8 +46,9 @@ export const deleteVideoByID = (id) => {
 };
 
 // get my videos (creator role only)
-export const getMyVideos = () => {
-  return axiosInstance.get(`/VideoPosts/me`);
+export const getMyVideos = async () => {
+  const response = axiosInstance.get(`/VideoPosts/me`);
+  return response;
 };
 
 // {

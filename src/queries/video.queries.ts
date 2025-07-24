@@ -13,7 +13,7 @@ export const useGetAllVideos = () => {
     queryKey: ["get-all-videos"],
     queryFn: async () => {
       const response = await getAllVideos();
-      console.log(response.data);
+      // console.log(response.data);
       return response;
     },
   });
@@ -61,6 +61,10 @@ export const useDeleteVideoByID = () => {
 export const useGetMyVideos = () => {
   return useQuery({
     queryKey: ["get-video-by-id"],
-    queryFn: () => getMyVideos(),
+    queryFn: async () => {
+      const response = await getMyVideos();
+      // console.log(response.data);
+      return response.data;
+    },
   });
 };
