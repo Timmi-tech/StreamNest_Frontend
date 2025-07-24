@@ -34,6 +34,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function StreamNestLanding() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -290,14 +291,20 @@ export default function StreamNestLanding() {
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
               <Button
+                onClick={() => router.push("/auth/signup")}
                 size="lg"
                 className="bg-gradient-to-r from-primary to-chart-2 hover:from-primary/90 hover:to-chart-2/90 text-white text-lg px-8 py-6 rounded-2xl shadow-2xl hover:shadow-primary/25 transition-all duration-300 group"
               >
-                Start Creating Free
+                Get Started
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
 
               <Button
+                onClick={() =>
+                  toast.message("Our Demo Video is coming Soon", {
+                    description: "Stay tuned😉",
+                  })
+                }
                 variant="outline"
                 size="lg"
                 className="text-lg px-8 py-6 rounded-2xl border-2 hover:bg-accent/5 transition-all duration-300 group"
