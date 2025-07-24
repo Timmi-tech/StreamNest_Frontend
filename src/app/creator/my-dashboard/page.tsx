@@ -419,11 +419,11 @@ export default function CreatorDashboard() {
                         <div className="flex items-center space-x-3">
                           <span className="flex items-center space-x-1">
                             <Eye className="w-3 h-3" />
-                            <span>{formatNumber(video.stats.views)}</span>
+                            {/* <span>{formatNumber(video.stats.views)}</span> */}
                           </span>
                           <span className="flex items-center space-x-1">
                             <Heart className="w-3 h-3" />
-                            <span>{formatNumber(video.stats.likes)}</span>
+                            {/* <span>{formatNumber(video.stats.likes)}</span> */}
                           </span>
                         </div>
                         <button
