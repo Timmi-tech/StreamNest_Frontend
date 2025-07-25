@@ -1,3 +1,4 @@
+import { useLikeVideo } from "@/queries/likes.queries";
 import { UseQueryResult } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
@@ -25,17 +26,23 @@ export const useVideoPlayer = ({
   const containerRef = useRef(null);
   const videoRefs = useRef([]);
 
-  const toggleLike = (videoId, index) => {
-    setLikedVideos((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
-      } else {
-        newSet.add(index);
-      }
-      return newSet;
-    });
-  };
+  // const LikeVideo = useLikeVideo(videoId);
+  // const toggleLike = async (videoId, index) => {
+  //   try {
+  //     await LikeVideo.mutateAsync(videoId);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  //   setLikedVideos((prev) => {
+  //     const newSet = new Set(prev);
+  //     if (newSet.has(index)) {
+  //       newSet.delete(index);
+  //     } else {
+  //       newSet.add(index);
+  //     }
+  //     return newSet;
+  //   });
+  // };
 
   const toggleFollow = (userId) => {
     setFollowedUsers((prev) => {
@@ -279,7 +286,7 @@ export const useVideoPlayer = ({
     isPlaying,
     currentVideoIndex,
     // functions
-    toggleLike,
+    // toggleLike,
     toggleFollow,
     // event handlers
     handleScroll,

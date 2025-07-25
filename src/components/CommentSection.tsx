@@ -1,74 +1,59 @@
 import { MessageCircle, Send } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "./Drawer";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Comment } from "./Comments";
+import { useCommentStore } from "@/store/CommentStore";
+import { useCreateComments, useGetComments } from "@/queries/comment.queries";
+import { getUser } from "@/store/AuthStore";
 
 // Main Comment Section Component
 const CommentSection = ({
   isOpen,
   setIsOpen,
+  selectedVideoId,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
+  selectedVideoId: string;
 }) => {
   //   const [isOpen, setIsOpen] = useState(false);
   const [newComment, setNewComment] = useState("");
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      username: "sarah_jones",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b1e0?w=100&h=100&fit=crop&crop=face",
-      text: "This is amazing! Love the creativity 🔥",
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      likes: 12,
-      isLiked: false,
-    },
-    {
-      id: 2,
-      username: "mike_chen",
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      text: "Tutorial please! How did you do this?",
-      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-      likes: 8,
-      isLiked: true,
-    },
-    {
-      id: 3,
-      username: "emma_wilson",
-      avatar:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      text: "Absolutely stunning work! Keep it up 👏",
-      timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000),
-      likes: 15,
-      isLiked: false,
-    },
-    {
-      id: 4,
-      username: "alex_kim",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      text: "This deserves way more views! Sharing with my friends",
-      timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
-      likes: 23,
-      isLiked: false,
-    },
-  ]);
+  const [comments, setComments] = useState();
+
+  const user = getUser();
+
+  const videoId = useCommentStore((state) => state.videoId);
+  // create Comments
+  const CreateComment = useCreateComments();
+
+  // get Comments
+  const getComments = useGetComments(selectedVideoId, { enabled: isOpen });
+
+  useEffect(() => {
+    if (getComments.isSuccess) {
+      setComments(getComments.data);
+    }
+  }, [getComments.isSuccess]);
 
   const handleAddComment = () => {
+    console.log(videoId);
     if (newComment.trim()) {
-      const comment = {
-        id: comments.length + 1,
-        username: "you",
-        avatar:
-          "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
-        text: newComment.trim(),
-        timestamp: new Date(),
-        likes: 0,
-        isLiked: false,
-      };
-      setComments([comment, ...comments]);
+      CreateComment.mutateAsync({
+        content: newComment.trim(),
+        videoId: videoId,
+      });
+
+      // const comment = {
+      //   id: comments.length + 1,
+      //   username: "you",
+      //   avatar:
+      //     "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
+      //   text: newComment.trim(),
+      //   timestamp: new Date(),
+      //   likes: 0,
+      //   isLiked: false,
+      // };
+      // setComments([comment, ...comments]);
       setNewComment("");
     }
   };
@@ -94,6 +79,26 @@ const CommentSection = ({
     }
   };
 
+  if (getComments.isPending) {
+    return (
+      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Comments</DrawerTitle>
+          </DrawerHeader>
+
+          {/* Comments List */}
+          <div className="flex-1 overflow-y-auto px-6">
+            <div className="text-center py-12">
+              <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">Getting comments</p>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     // <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 p-4">
     //   {/* Trigger Button */}
@@ -109,21 +114,22 @@ const CommentSection = ({
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>{comments.length} Comments</DrawerTitle>
+          <DrawerTitle>{comments && comments.length} Comments</DrawerTitle>
         </DrawerHeader>
 
         {/* Comments List */}
         <div className="flex-1 overflow-y-auto px-6">
-          {comments.map((comment) => (
-            <Comment
-              key={comment.id}
-              comment={comment}
-              onLike={handleLike}
-              onReply={() => console.log("Reply to", comment.username)}
-            />
-          ))}
+          {comments &&
+            comments.map((comment) => (
+              <Comment
+                key={comment.id}
+                comment={comment}
+                onLike={handleLike}
+                onReply={() => console.log("Reply to", comment.username)}
+              />
+            ))}
 
-          {comments.length === 0 && (
+          {comments && comments.length === 0 && (
             <div className="text-center py-12">
               <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500">
@@ -136,11 +142,14 @@ const CommentSection = ({
         {/* Comment Input */}
         <div className="p-4 border-t border-gray-100 bg-white">
           <div className="flex items-end space-x-3">
-            <img
+            <div className="w-8 h-8 border-2 border-white rounded-full bg-gradient-to-br from-primary to-chart-2 flex items-center justify-center text-white font-bold text-md">
+              {user.username[0]}
+            </div>
+            {/* <img
               src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face"
               alt="Your avatar"
               className="w-8 h-8 rounded-full object-cover"
-            />
+            /> */}
             <div className="flex-1 relative">
               <textarea
                 value={newComment}

@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { toast } from "sonner";
 import CommentSection from "./CommentSection";
+import { setVideoId } from "@/store/CommentStore";
+import { useGetLikes, useLikeVideo } from "@/queries/likes.queries";
 
 export const VideoPlayer = ({
   AllVideos,
@@ -25,6 +27,7 @@ export const VideoPlayer = ({
   view?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedVideoId, setSelectedVideoId] = useState("");
   const router = useRouter();
   const render = "once";
   // log user out
@@ -34,6 +37,11 @@ export const VideoPlayer = ({
     router.push("auth/login");
     // routerServerGlobal.
   };
+  // reseting
+  useEffect(() => {
+    !isOpen && setSelectedVideoId("");
+    console.log(AllVideos.data);
+  }, [isOpen]);
 
   // user details
   const user = getUser();
@@ -41,6 +49,7 @@ export const VideoPlayer = ({
   // render toast
 
   const {
+    // LikeVideo,
     // ref
     containerRef,
     videoRefs,
@@ -60,7 +69,7 @@ export const VideoPlayer = ({
     isPlaying,
     currentVideoIndex,
     // functions
-    toggleLike,
+    // toggleLike,
     toggleFollow,
     // event handlers
     handleScroll,
@@ -75,6 +84,20 @@ export const VideoPlayer = ({
     toggleMute,
     seekTo,
   } = useVideoPlayer({ AllVideos });
+
+  const Likes = useGetLikes(AllVideos.data[currentVideoIndex].id);
+  const LikeVideo = useLikeVideo(AllVideos.data[currentVideoIndex].id);
+
+  useEffect(() => {
+    Likes.isSuccess && console.log(Likes.data);
+  }, [Likes.isSuccess]);
+
+  const isVideoLiked = (Likes, LikeVideo) => {
+    if (LikeVideo?.data?.isLiked !== undefined) return LikeVideo.data.isLiked;
+    if (!Likes.isPending && Likes?.data?.isLiked !== undefined)
+      return Likes.data.isLiked;
+    return false;
+  };
 
   return (
     <div
@@ -295,26 +318,27 @@ export const VideoPlayer = ({
                 <div className="flex flex-col items-center">
                   <button
                     className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
-                    onClick={() => toggleLike(video.id, index)}
+                    onClick={() => LikeVideo.mutate()}
                   >
                     <Heart
                       className={`w-7 h-7 transition-colors ${
-                        likedVideos.has(index)
+                        !Likes.isPending && Likes?.data?.isLiked
                           ? "fill-red-500 text-red-500"
                           : "text-white hover:text-red-300"
                       }`}
                     />
                   </button>
                   <span className="text-white text-xs font-medium mt-1">
-                    {/* {formatNumber(
-                    video.stats.likes + (likedVideos.has(index) ? 1 : 0)
-                  )} */}
+                    {!Likes.isPending && Likes?.data?.totalLikes}
                   </span>
                 </div>
 
                 <div className="flex flex-col items-center">
                   <button
-                    onClick={() => setIsOpen((prev) => !prev)}
+                    onClick={() => {
+                      setSelectedVideoId(video.id);
+                      setIsOpen((prev) => !prev);
+                    }}
                     className="w-12 h-12 text-white hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
                   >
                     <MessageCircle className="w-7 h-7" />
@@ -361,11 +385,10 @@ export const VideoPlayer = ({
                 <div className="flex items-center space-x-3 mb-3">
                   {/* use avater */}
                   <div className="w-14 h-14 border-2 border-white rounded-full bg-gradient-to-br from-primary to-chart-2 flex items-center justify-center text-white font-bold text-lg">
-                    T{/* {video.user.displayName[0]} */}
+                    {video.userName[0]}
                   </div>
                   <span className="text-white font-semibold text-lg">
-                    Test user
-                    {/* {video.user.username} */}
+                    {video.userName}
                   </span>
                   {/* user verified */}
                   {/* {video.user.verified && (
@@ -456,7 +479,11 @@ export const VideoPlayer = ({
           ))}
       </div>
 
-      <CommentSection isOpen={isOpen} setIsOpen={setIsOpen} />
+      <CommentSection
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        selectedVideoId={selectedVideoId}
+      />
       {/* Bottom Navigation */}
       {/* <div className="absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-lg border-t border-gray-800 z-30">
         <div className="flex items-center justify-around py-3">

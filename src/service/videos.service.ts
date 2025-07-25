@@ -1,8 +1,3 @@
-import {
-  getUploadProgress,
-  setUploadProgress,
-  setUploadStatus,
-} from "@/store/VideoUpload";
 import { axiosInstance } from "./axios";
 
 // get all videos
