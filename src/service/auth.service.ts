@@ -12,18 +12,21 @@ import {
 import Cookies from "js-cookie";
 
 export const login = async (data) => {
-  const response = await axiosInstance.post("/authentication/login", data);
-  console.log(response.data);
+  try {
+    const response = await axiosInstance.post("/authentication/login", data);
+    const { accessToken, refreshToken } = response.data;
 
-  const { accessToken, refreshToken } = response.data;
-  setAccessToken(accessToken);
-  setRefreshToken(refreshToken);
-  // fetch user profile after login
-  const userProfile = await getUserProfile();
-  // set user profile in store
-  useAuthStore.getState().setUser(userProfile.data); // ✅ Valid
-  console.log(userProfile.data);
-  return response.data;
+    setAccessToken(accessToken);
+    setRefreshToken(refreshToken);
+
+    const userProfile = await getUserProfile();
+    useAuthStore.getState().setUser(userProfile.data);
+
+    return response.data;
+  } catch (error) {
+    console.error("Login error:", error);
+    throw error; // re-throw so caller can catch it
+  }
 };
 
 export const refreshAccessToken = async () => {

@@ -97,7 +97,7 @@ export const VideoPlayer = ({
   };
 
   return (
-    <div className="h-full bg-black relative overflow-hidden">
+    <div className="pb-safe h-full bg-black relative overflow-hidden pb-[env(safe-area-inset-bottom)]">
       {/* Enhanced Debug Info */}
       {/* <div className="absolute top-4 left-4 z-50 bg-black/90 text-white p-3 rounded text-xs max-w-sm">
         <div className="font-bold mb-2">Lazy Loading Debug:</div>
@@ -192,7 +192,7 @@ export const VideoPlayer = ({
       {/* Video Feed */}
       <div
         ref={containerRef}
-        className=" overflow-y-scroll snap-y snap-mandatory"
+        className="pb-safe overflow-y-scroll snap-y snap-mandatory pb-[env(safe-area-inset-bottom)]"
         onScroll={handleScroll}
         style={{
           scrollbarWidth: "none",
@@ -296,7 +296,7 @@ export const VideoPlayer = ({
               )}
 
               {/* Right Side Actions */}
-              <div className="absolute right-4 bottom-5 flex flex-col items-center space-y-6 z-20">
+              <div className="absolute right-4 bottom-20 [env(safe-area-inset-bottom)] flex flex-col items-center space-y-6 z-20">
                 {/* User Avatar */}
                 <div className="relative">
                   {/* <div className="w-14 h-14 border-2 border-white rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
@@ -379,7 +379,7 @@ export const VideoPlayer = ({
               </div>
 
               {/* Bottom Content */}
-              <div className="absolute bottom-0 left-0 right-20 p-4 z-15">
+              <div className="absolute bottom-18 [env(safe-area-inset-bottom)] left-0 right-20 p-4 z-15">
                 <div className="flex items-center space-x-3 mb-3">
                   {/* use avater */}
                   <div className="w-14 h-14 border-2 border-white rounded-full bg-gradient-to-br from-primary to-chart-2 flex items-center justify-center text-white font-bold text-lg">
