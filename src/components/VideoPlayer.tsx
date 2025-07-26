@@ -116,7 +116,7 @@ export const VideoPlayer = ({
       </div> */}
 
       {/* Top Navigation */}
-      <div className="absolute top-0 left-0 right-0 z-30 bg-gradient-to-b from-black/80 to-transparent">
+      <div className="absolute top-0 left-0 right-0 z-30 bg-gradient-to-b from-black/80 to-transparent pt-[env(safe-area-inset-top)]">
         <div className="flex items-center justify-between p-4 pt-5">
           <div className="flex items-center space-x-4">
             {view != "video" ? (
@@ -192,19 +192,23 @@ export const VideoPlayer = ({
       {/* Video Feed */}
       <div
         ref={containerRef}
-        className="pb-safe overflow-y-scroll snap-y snap-mandatory pb-[env(safe-area-inset-bottom)]"
+        className="overflow-y-scroll snap-y snap-mandatory"
         onScroll={handleScroll}
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
           height: "calc(var(--vh, 1vh) * 100)",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         {AllVideos.data?.length > 0 &&
           AllVideos.data?.map((video, index) => (
             <div
               key={video.id}
-              className="h-screen w-full snap-start relative bg-black"
+              className="w-full snap-start relative bg-black"
+              style={{
+                height: "calc(var(--vh, 1vh) * 100)",
+              }}
             >
               {/* Lazy Loaded HTML5 Video */}
               <div className="absolute inset-0">
@@ -296,7 +300,12 @@ export const VideoPlayer = ({
               )}
 
               {/* Right Side Actions */}
-              <div className="absolute right-4 bottom-20 [env(safe-area-inset-bottom)] flex flex-col items-center space-y-6 z-20">
+              <div
+                className="absolute right-4 flex flex-col items-center space-y-6 z-20"
+                style={{
+                  bottom: `calc(5rem + env(safe-area-inset-bottom))`,
+                }}
+              >
                 {/* User Avatar */}
                 <div className="relative">
                   {/* <div className="w-14 h-14 border-2 border-white rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
@@ -379,7 +388,12 @@ export const VideoPlayer = ({
               </div>
 
               {/* Bottom Content */}
-              <div className="absolute bottom-18 [env(safe-area-inset-bottom)] left-0 right-20 p-4 z-15">
+              <div
+                className="absolute left-0 right-20 p-4 z-15"
+                style={{
+                  bottom: `calc(1rem + env(safe-area-inset-bottom))`,
+                }}
+              >
                 <div className="flex items-center space-x-3 mb-3">
                   {/* use avater */}
                   <div className="w-14 h-14 border-2 border-white rounded-full bg-gradient-to-br from-primary to-chart-2 flex items-center justify-center text-white font-bold text-lg">

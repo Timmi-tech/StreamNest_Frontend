@@ -173,3 +173,12 @@
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
+:root {
+  --vh: 1vh;
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --vh: 1dvh;
+  }
+}
