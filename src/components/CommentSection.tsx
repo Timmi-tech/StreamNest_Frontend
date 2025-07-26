@@ -167,7 +167,7 @@ const CommentSection = ({
                 onChange={(e) => setNewComment(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder="Add a comment..."
-                className="w-full px-4 py-3 bg-gray-50 rounded-2xl border-0 resize-none text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all"
+                className="w-full px-4 py-3 bg-gray-50 text-[16px] rounded-2xl border-0 resize-none text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all"
                 rows="1"
                 style={{ minHeight: "44px", maxHeight: "120px" }}
               />
