@@ -22,12 +22,22 @@ const CommentSection = ({
 
   const user = getUser();
 
-  const videoId = useCommentStore((state) => state.videoId);
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
+
   // create Comments
-  const CreateComment = useCreateComments();
+  const CreateComment = useCreateComments(
+    selectedVideoId,
+    user ? user.username : "ME"
+  );
 
   // get Comments
   const getComments = useGetComments(selectedVideoId, { enabled: isOpen });
+
+  useEffect(() => {
+    getComments.isSuccess && console.log("coments", getComments.data);
+  }, [getComments.isSuccess]);
 
   useEffect(() => {
     if (getComments.isSuccess) {
@@ -36,11 +46,10 @@ const CommentSection = ({
   }, [getComments.isSuccess]);
 
   const handleAddComment = () => {
-    console.log(videoId);
+    console.log(selectedVideoId);
     if (newComment.trim()) {
       CreateComment.mutateAsync({
         content: newComment.trim(),
-        videoId: videoId,
       });
 
       // const comment = {
@@ -114,13 +123,15 @@ const CommentSection = ({
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>{comments && comments.length} Comments</DrawerTitle>
+          <DrawerTitle>
+            {getComments && getComments.data?.length} Comments
+          </DrawerTitle>
         </DrawerHeader>
 
         {/* Comments List */}
         <div className="flex-1 overflow-y-auto px-6">
-          {comments &&
-            comments.map((comment) => (
+          {getComments &&
+            getComments?.data?.map((comment) => (
               <Comment
                 key={comment.id}
                 comment={comment}
@@ -129,7 +140,7 @@ const CommentSection = ({
               />
             ))}
 
-          {comments && comments.length === 0 && (
+          {getComments && getComments.data?.length === 0 && (
             <div className="text-center py-12">
               <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500">

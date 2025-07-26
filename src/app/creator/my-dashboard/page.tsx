@@ -444,11 +444,11 @@ export default function CreatorDashboard() {
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
                           <div className="flex items-center space-x-3">
                             <span className="flex items-center space-x-1">
-                              <Eye className="w-3 h-3" />
+                              {/* <Eye className="w-3 h-3" /> */}
                               {/* <span>{formatNumber(video.stats.views)}</span> */}
                             </span>
                             <span className="flex items-center space-x-1">
-                              <Heart className="w-3 h-3" />
+                              {/* <Heart className="w-3 h-3" /> */}
                               {/* <span>{formatNumber(video.stats.likes)}</span> */}
                             </span>
                           </div>
@@ -459,7 +459,7 @@ export default function CreatorDashboard() {
                             }}
                             className="p-1 hover:bg-red-100 hover:text-red-600 rounded transition-colors"
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>

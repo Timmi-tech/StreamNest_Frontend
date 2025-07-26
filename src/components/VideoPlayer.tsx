@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import CommentSection from "./CommentSection";
 import { setVideoId } from "@/store/CommentStore";
 import { useGetLikes, useLikeVideo } from "@/queries/likes.queries";
+import { useGetComments } from "@/queries/comment.queries";
 
 export const VideoPlayer = ({
   AllVideos,
@@ -37,11 +38,6 @@ export const VideoPlayer = ({
     router.push("auth/login");
     // routerServerGlobal.
   };
-  // reseting
-  useEffect(() => {
-    !isOpen && setSelectedVideoId("");
-    console.log(AllVideos.data);
-  }, [isOpen]);
 
   // user details
   const user = getUser();
@@ -84,9 +80,10 @@ export const VideoPlayer = ({
     toggleMute,
     seekTo,
   } = useVideoPlayer({ AllVideos });
-
-  const Likes = useGetLikes(AllVideos.data[currentVideoIndex].id);
-  const LikeVideo = useLikeVideo(AllVideos.data[currentVideoIndex].id);
+  const videoId = AllVideos.data[currentVideoIndex].id;
+  const Likes = useGetLikes(videoId);
+  const LikeVideo = useLikeVideo(videoId);
+  const Comments = useGetComments(videoId, { enabled: true });
 
   useEffect(() => {
     Likes.isSuccess && console.log(Likes.data);
@@ -100,10 +97,7 @@ export const VideoPlayer = ({
   };
 
   return (
-    <div
-      className="bg-black relative overflow-hidden"
-      style={{ height: "calc(var(--vh, 1vh) * 100)" }}
-    >
+    <div className="h-full bg-black relative overflow-hidden">
       {/* Enhanced Debug Info */}
       {/* <div className="absolute top-4 left-4 z-50 bg-black/90 text-white p-3 rounded text-xs max-w-sm">
         <div className="font-bold mb-2">Lazy Loading Debug:</div>
@@ -198,9 +192,13 @@ export const VideoPlayer = ({
       {/* Video Feed */}
       <div
         ref={containerRef}
-        className="h-full overflow-y-scroll snap-y snap-mandatory"
+        className=" overflow-y-scroll snap-y snap-mandatory"
         onScroll={handleScroll}
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          height: "calc(var(--vh, 1vh) * 100)",
+        }}
       >
         {AllVideos.data?.length > 0 &&
           AllVideos.data?.map((video, index) => (
@@ -344,7 +342,7 @@ export const VideoPlayer = ({
                     <MessageCircle className="w-7 h-7" />
                   </button>
                   <span className="text-white text-xs font-medium mt-1">
-                    {/* {formatNumber(video.stats.comments)} */}
+                    {Comments && Comments.data?.length}
                   </span>
                 </div>
 
@@ -482,7 +480,7 @@ export const VideoPlayer = ({
       <CommentSection
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        selectedVideoId={selectedVideoId}
+        selectedVideoId={videoId}
       />
       {/* Bottom Navigation */}
       {/* <div className="absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-lg border-t border-gray-800 z-30">
