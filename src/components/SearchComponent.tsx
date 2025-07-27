@@ -30,6 +30,10 @@ import {
   SlidersHorizontal,
   Wifi,
   WifiOff,
+  Laugh,
+  Drama,
+  MonitorPlay,
+  GalleryVerticalEnd,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -56,6 +60,8 @@ import SearchSkeleton from "./SearchSkeleton";
 import { useRouter } from "next/navigation";
 import { useSearch } from "@/queries/search.queries";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useAuthStore } from "@/store/AuthStore";
+import { VideoPlayer } from "./VideoPlayer";
 
 // No Results Component
 function NoResults({ searchQuery, onClearSearch }) {
@@ -121,6 +127,8 @@ export const SearchComponent = () => {
   const [viewMode, setViewMode] = useState("grid");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState();
+  const [view, setView] = useState("search");
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500); // 500ms delay
   const SearchQuery = useSearch(
@@ -137,6 +145,9 @@ export const SearchComponent = () => {
 
   const [isLoading, setIsLoading] = useState(SearchQuery.isPending);
   const [hasError, setHasError] = useState(SearchQuery.isError);
+
+  // get logged in user
+  const { user } = useAuthStore();
 
   const router = useRouter();
 
@@ -217,16 +228,13 @@ export const SearchComponent = () => {
 
   const genres = [
     { value: "all", label: "All Categories", icon: Sparkles },
-    { value: "Technology", label: "Technology", icon: Zap },
-    { value: "Education", label: "Education", icon: BookOpen },
-    { value: "Entertainment", label: "Entertainment", icon: Sparkles },
+    { value: "Comedy", label: "Comedy", icon: Laugh },
     { value: "Music", label: "Music", icon: Music },
-    { value: "Gaming", label: "Gaming", icon: Gamepad2 },
-    { value: "News", label: "News", icon: Newspaper },
     { value: "Sports", label: "Sports", icon: Dumbbell },
-    { value: "Lifestyle", label: "Lifestyle", icon: Heart },
-    { value: "Travel", label: "Travel", icon: Plane },
-    { value: "Cooking", label: "Cooking", icon: Utensils },
+    { value: "Drama", label: "Drama", icon: Drama },
+    { value: "Tutorial", label: "Tutorial", icon: MonitorPlay },
+    { value: "Gaming", label: "Gaming", icon: Gamepad2 },
+    { value: "Other", label: "Other", icon: GalleryVerticalEnd },
   ];
 
   const years = [
@@ -335,13 +343,23 @@ export const SearchComponent = () => {
     handleSearch();
   }, [selectedGenre, selectedYear]);
 
+  if (view == "video") {
+    return (
+      <VideoPlayer
+        AllVideos={{ data: [selectedVideo] }}
+        view={view}
+        setView={setView}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
         <div className="container flex items-center gap-4 py-4">
           <Button onClick={() => router.back()} variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-6 w-6" />
           </Button>
 
           {/* Search Bar */}
@@ -548,7 +566,7 @@ export const SearchComponent = () => {
               </div>
             </div>
           </div>
-        ) : isLoading ? (
+        ) : SearchQuery && SearchQuery.isPending ? (
           /* Loading State */
           <SearchSkeleton />
         ) : hasError ? (
@@ -573,7 +591,7 @@ export const SearchComponent = () => {
                   {searchResults.length !== 1 ? "s" : ""} found
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <Select defaultValue="relevant">
                   <SelectTrigger className="w-32">
                     <SelectValue />
@@ -585,7 +603,7 @@ export const SearchComponent = () => {
                     <SelectItem value="views">Most Viewed</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
             </div>
 
             {/* Results Grid */}
@@ -594,8 +612,12 @@ export const SearchComponent = () => {
                 {SearchQuery &&
                   SearchQuery.data?.map((video) => (
                     <Card
+                      onClick={() => {
+                        setSelectedVideo(video);
+                        setView("video");
+                      }}
                       key={video.id}
-                      className="group overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer"
+                      className="group overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer py-0 gap-4"
                     >
                       <div className="relative aspect-[3/4] overflow-hidden">
                         <video
@@ -645,16 +667,16 @@ export const SearchComponent = () => {
                         </div>
                       </div>
 
-                      <CardContent className="p-3 space-y-2">
-                        <h3 className="font-medium text-sm line-clamp-2 leading-tight">
+                      <CardContent className="p-3 pt-0 space-y-2">
+                        <h3 className="font-bold text-sm line-clamp-2 leading-tight">
                           {video.title}
                         </h3>
                         <div className="flex items-center space-x-2">
                           <div className="w-6 h-6 bg-gradient-to-br from-primary to-primary/60 rounded-full flex items-center justify-center text-xs text-white font-medium">
-                            {/* {video.user.username[0]} */}
+                            {video.userName[0]}
                           </div>
                           <span className="text-xs text-muted-foreground truncate">
-                            {/* {video.user.username} */}
+                            {video.userName}
                           </span>
                           {/* {video.user.verified && (
                           <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">

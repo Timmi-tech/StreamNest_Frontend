@@ -32,6 +32,7 @@ export const VideoPlayer = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedVideoId, setSelectedVideoId] = useState("");
+  const [isMobile, setIsMobile] = useState("");
   const router = useRouter();
   const render = "once";
   // log user out
@@ -99,6 +100,11 @@ export const VideoPlayer = ({
       return Likes.data.isLiked;
     return false;
   };
+  const Screen = window.innerWidth;
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    setIsMobile(isMobile);
+  }, [Screen]);
 
   if (isSearchOpen) {
     return <SearchComponent setIsSearchOpen={setIsSearchOpen} />;
@@ -142,7 +148,7 @@ export const VideoPlayer = ({
             ) : (
               <>
                 <button
-                  onClick={() => setView("dashboard")}
+                  onClick={() => setView && setView("dashboard")}
                   className="p-2 hover:bg-white/10 rounded-full transition-colors"
                 >
                   <ArrowLeft className="w-8 h-8 cursor-pointer text-white" />
@@ -167,31 +173,41 @@ export const VideoPlayer = ({
           </div>
           {/* search and more */}
           <div className="flex items-center space-x-2">
-            <button
-              onClick={() => router.push("/search")}
-              className="text-white p-2 hover:bg-white/10 rounded-full"
-            >
-              <Search className="w-6 h-6" />
-            </button>
             {/* this check if the video is rendering in the user dashboard vie video if it is it dosent return the buttons */}
             {/* if its not then it check the user role and renders the required button */}
             {view != "video" ? (
               (user && user.role) == "Creator" ? (
-                <button
-                  onClick={() => router.push("creator/my-dashboard")}
-                  className="text-black p-1 px-4 bg-white hover:border-primary rounded-full"
-                >
-                  Dashboard
-                  {/* <LogOut className="w-6 h-6" /> */}
-                </button>
+                <>
+                  <button
+                    onClick={() => router.push("/search")}
+                    className="text-white p-2 hover:bg-white/10 rounded-full"
+                  >
+                    <Search className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={() => router.push("creator/my-dashboard")}
+                    className="text-black p-1 px-4 bg-white hover:border-primary rounded-full"
+                  >
+                    Dashboard
+                    {/* <LogOut className="w-6 h-6" /> */}
+                  </button>
+                </>
               ) : (
-                <button
-                  onClick={handleLogOut}
-                  className="text-black p-1 px-4 bg-white hover:border-primary rounded-full"
-                >
-                  Log out
-                  {/* <LogOut className="w-6 h-6" /> */}
-                </button>
+                <>
+                  <button
+                    onClick={() => router.push("/search")}
+                    className="text-white p-2 hover:bg-white/10 rounded-full"
+                  >
+                    <Search className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={handleLogOut}
+                    className="text-black p-1 px-4 bg-white hover:border-primary rounded-full"
+                  >
+                    Log out
+                    {/* <LogOut className="w-6 h-6" /> */}
+                  </button>
+                </>
               )
             ) : (
               ""
@@ -258,7 +274,7 @@ export const VideoPlayer = ({
                       left: 0,
                       width: "100%",
                       height: "100%",
-                      objectFit: "cover",
+                      objectFit: isMobile ? "cover" : "contain",
                       backgroundColor: "#000",
                     }}
                   />
