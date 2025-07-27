@@ -467,7 +467,7 @@ export const SearchComponent = () => {
           </Sheet>
 
           {/* View Mode Toggle */}
-          <div className="flex items-center border rounded-lg p-1">
+          {/* <div className="flex items-center border rounded-lg p-1">
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
               size="sm"
@@ -484,7 +484,7 @@ export const SearchComponent = () => {
             >
               <List className="h-4 w-4" />
             </Button>
-          </div>
+          </div> */}
         </div>
       </header>
 
