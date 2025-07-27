@@ -6,6 +6,7 @@ import {
   Heart,
   MessageCircle,
   Play,
+  Search,
   Video,
   Volume2,
   VolumeX,
@@ -17,6 +18,7 @@ import CommentSection from "./CommentSection";
 import { setVideoId } from "@/store/CommentStore";
 import { useGetLikes, useLikeVideo } from "@/queries/likes.queries";
 import { useGetComments } from "@/queries/comment.queries";
+import { SearchComponent } from "./SearchComponent";
 
 export const VideoPlayer = ({
   AllVideos,
@@ -28,14 +30,15 @@ export const VideoPlayer = ({
   view?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedVideoId, setSelectedVideoId] = useState("");
   const router = useRouter();
   const render = "once";
   // log user out
   const handleLogOut = () => {
+    router.push("auth/login");
     LogUserOut();
     console.log("logged out");
-    router.push("auth/login");
     // routerServerGlobal.
   };
 
@@ -80,7 +83,8 @@ export const VideoPlayer = ({
     toggleMute,
     seekTo,
   } = useVideoPlayer({ AllVideos });
-  const videoId = AllVideos.data[currentVideoIndex].id;
+
+  const videoId = AllVideos && AllVideos.data[currentVideoIndex].id;
   const Likes = useGetLikes(videoId);
   const LikeVideo = useLikeVideo(videoId);
   const Comments = useGetComments(videoId, { enabled: true });
@@ -95,6 +99,10 @@ export const VideoPlayer = ({
       return Likes.data.isLiked;
     return false;
   };
+
+  if (isSearchOpen) {
+    return <SearchComponent setIsSearchOpen={setIsSearchOpen} />;
+  }
 
   return (
     <div className="pb-safe h-full bg-black relative overflow-hidden pb-[env(safe-area-inset-bottom)]">
@@ -159,9 +167,12 @@ export const VideoPlayer = ({
           </div>
           {/* search and more */}
           <div className="flex items-center space-x-2">
-            {/* <button className="text-white p-2 hover:bg-white/10 rounded-full">
+            <button
+              onClick={() => router.push("/search")}
+              className="text-white p-2 hover:bg-white/10 rounded-full"
+            >
               <Search className="w-6 h-6" />
-            </button> */}
+            </button>
             {/* this check if the video is rendering in the user dashboard vie video if it is it dosent return the buttons */}
             {/* if its not then it check the user role and renders the required button */}
             {view != "video" ? (
@@ -303,7 +314,7 @@ export const VideoPlayer = ({
               <div
                 className="absolute right-4 flex flex-col items-center space-y-6 z-20"
                 style={{
-                  bottom: `calc(5rem + env(safe-area-inset-bottom))`,
+                  bottom: `calc(2rem + env(safe-area-inset-bottom))`,
                 }}
               >
                 {/* User Avatar */}
@@ -496,6 +507,9 @@ export const VideoPlayer = ({
         setIsOpen={setIsOpen}
         selectedVideoId={videoId}
       />
+      {/* Search Component */}
+      {/* {isSearchOpen && <SearchComponent setIsSearchOpen={setIsSearchOpen} />} */}
+
       {/* Bottom Navigation */}
       {/* <div className="absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-lg border-t border-gray-800 z-30">
         <div className="flex items-center justify-around py-3">

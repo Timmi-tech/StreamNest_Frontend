@@ -13,7 +13,7 @@ export default function HTML5VideoFeed() {
     toast.info("Video muted? ", {
       description: "Click the Unmute button at the bottom of the Screen😉",
     });
-  }, []);
+  }, [AllVideos.isSuccess]);
 
   if (AllVideos.isPending) return <VideoFeedSkeleton />;
 

@@ -154,7 +154,7 @@ const CommentSection = ({
         <div className="p-4 border-t border-gray-100 bg-white">
           <div className="flex items-end space-x-3">
             <div className="w-8 h-8 border-2 border-white rounded-full bg-gradient-to-br from-primary to-chart-2 flex items-center justify-center text-white font-bold text-md">
-              {user.username[0]}
+              {user && user.username[0]}
             </div>
             {/* <img
               src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face"
@@ -167,7 +167,7 @@ const CommentSection = ({
                 onChange={(e) => setNewComment(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder="Add a comment..."
-                className="w-full px-4 py-3 bg-gray-50 text-[16px] rounded-2xl border-0 resize-none text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all"
+                className="w-full px-4 py-3 bg-gray-50 text-[16px] rounded-2xl border-0 resize-none text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all"
                 rows="1"
                 style={{ minHeight: "44px", maxHeight: "120px" }}
               />
@@ -177,7 +177,7 @@ const CommentSection = ({
               disabled={!newComment.trim()}
               className={`p-3 rounded-full transition-all ${
                 newComment.trim()
-                  ? "bg-pink-500 text-white hover:bg-pink-600 transform hover:scale-105"
+                  ? "bg-primary text-white hover:bg-primary transform hover:scale-105"
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
               }`}
             >

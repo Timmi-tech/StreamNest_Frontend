@@ -74,8 +74,9 @@ export default function CreatorDashboard() {
   const myVideos = useGetMyVideos();
   useEffect(() => {
     if (myVideos.isSuccess) {
+      console.log(myVideos);
       myVideos.data.filter((video) => {
-        // console.log(video);
+        console.log(video);
       });
       setUserVideos(myVideos.data);
       console.log(myVideos.data?.length);
@@ -410,6 +411,11 @@ export default function CreatorDashboard() {
                       >
                         <video
                           src={video.videoUrl}
+                          poster={
+                            video.thumbnailUrl
+                              ? video.thumbnailUrl
+                              : "/images/defaultThumb.png"
+                          }
                           className="w-full h-full object-cover"
                           muted
                           preload="metadata"
