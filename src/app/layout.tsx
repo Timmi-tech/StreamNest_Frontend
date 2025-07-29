@@ -15,15 +15,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Stream Nest - AI-Powered Video Platform",
+  title: "Stream Nest - Video Platform",
   description:
-    "The next-generation video platform powered by AI. Upload in seconds, stream in 4K, and connect with millions of creators worldwide.",
+    "The next-generation video platform. Upload in seconds, stream in 4K, and connect with millions of creators worldwide.",
 
   // Keywords for SEO
   keywords: [
     "video platform",
     "streaming",
-    "AI-powered",
     "4K streaming",
     "content creators",
     "video sharing",
@@ -61,15 +60,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://streamnest.com",
     siteName: "Stream Nest",
-    title: "Stream Nest - AI-Powered Video Platform",
+    title: "Stream Nest - Video Platform",
     description:
-      "The next-generation video platform powered by AI. Upload in seconds, stream in 4K, and connect with millions of creators worldwide.",
+      "The next-generation video platform. Upload in seconds, stream in 4K, and connect with millions of creators worldwide.",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Stream Nest - AI-Powered Video Platform",
+        alt: "Stream Nest - Video Platform",
         type: "/images/defaultThumb.png",
       },
       {
@@ -87,9 +86,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@AJ_ITACHI",
     creator: "@AJ_ITACHI",
-    title: "Stream Nest - AI-Powered Video Platform",
+    title: "Stream Nest - Video Platform",
     description:
-      "The next-generation video platform powered by AI. Upload in seconds, stream in 4K, and connect with millions of creators worldwide.",
+      "The next-generation video platform. Upload in seconds, stream in 4K, and connect with millions of creators worldwide.",
     images: ["/images/defaultThumb.png"],
   },
 

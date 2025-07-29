@@ -53,7 +53,7 @@ export default function StreamNestLanding() {
   const features = [
     {
       icon: <Upload className="w-6 h-6" />,
-      title: "AI-Powered Upload",
+      title: "Fast Uploads",
       description:
         "Intelligent video processing with automatic optimization, thumbnail generation, and content analysis.",
       gradient: "from-blue-500 to-purple-600",
@@ -100,7 +100,7 @@ export default function StreamNestLanding() {
       name: "Alex Rivera",
       role: "Tech Reviewer",
       content:
-        "StreamNest isn't just another platform—it's the future of content creation. The AI features are game-changing.",
+        "StreamNest isn't just another platform—it's the future of content creation. The features are game-changing.",
       rating: 5,
       avatar: "AR",
       verified: true,
@@ -191,13 +191,13 @@ export default function StreamNestLanding() {
               <Button
                 onClick={() => router.push("/auth/login")}
                 variant="ghost"
-                className="hover:bg-accent/50"
+                className="hover:bg-accent/50 cursor-pointer"
               >
                 Sign In
               </Button>
               <Button
                 onClick={() => router.push("/auth/sigunuo")}
-                className="bg-gradient-to-r from-primary to-chart-2 hover:from-primary/90 hover:to-chart-2/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className=" cursor-pointer bg-gradient-to-r from-primary to-chart-2 hover:from-primary/90 hover:to-chart-2/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Get Started
                 <Sparkles className="w-4 h-4 ml-2" />
@@ -209,7 +209,7 @@ export default function StreamNestLanding() {
               variant="ghost"
               size="icon"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden"
+              className="md:hidden cursor-pointer"
             >
               {isMenuOpen ? (
                 <X className="w-5 h-5" />
@@ -246,13 +246,13 @@ export default function StreamNestLanding() {
                 <Button
                   onClick={() => router.push("/auth/login")}
                   variant="ghost"
-                  className="w-full justify-start"
+                  className="w-full justify-start cursor-pointer"
                 >
                   Sign In
                 </Button>
                 <Button
                   onClick={() => router.push("/auth/signup")}
-                  className="w-full bg-gradient-to-r from-primary to-chart-2 text-white"
+                  className="cursor-pointer w-full bg-gradient-to-r from-primary to-chart-2 text-white"
                 >
                   Get Started
                   <Sparkles className="w-4 h-4 ml-2" />
@@ -284,16 +284,15 @@ export default function StreamNestLanding() {
             </h1>
 
             <p className="text-xl sm:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
-              The next-generation video platform powered by AI. Upload in
-              seconds, stream in 4K, and connect with millions of creators
-              worldwide.
+              The next-generation video platform. Upload in seconds, stream in
+              4K, and connect with millions of creators worldwide.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
               <Button
                 onClick={() => router.push("/auth/signup")}
                 size="lg"
-                className="bg-gradient-to-r from-primary to-chart-2 hover:from-primary/90 hover:to-chart-2/90 text-white text-lg px-8 py-6 rounded-2xl shadow-2xl hover:shadow-primary/25 transition-all duration-300 group"
+                className="cursor-pointer bg-gradient-to-r from-primary to-chart-2 hover:from-primary/90 hover:to-chart-2/90 text-white text-lg px-8 py-6 rounded-2xl shadow-2xl hover:shadow-primary/25 transition-all duration-300 group"
               >
                 Get Started
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -307,7 +306,7 @@ export default function StreamNestLanding() {
                 }
                 variant="outline"
                 size="lg"
-                className="text-lg px-8 py-6 rounded-2xl border-2 hover:bg-accent/5 transition-all duration-300 group"
+                className="cursor-pointer text-lg px-8 py-6 rounded-2xl border-2 hover:bg-accent/5 transition-all duration-300 group"
               >
                 <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
                 Watch Demo
@@ -486,7 +485,7 @@ export default function StreamNestLanding() {
             <Button
               variant="outline"
               size="lg"
-              className="text-lg px-8 py-6 rounded-2xl border-2 border-white/30 text-white hover:bg-white/10 transition-all duration-300"
+              className=" cursor-pointer text-lg px-8 py-6 rounded-2xl border-2 hover:border-blue/50 border-white/30 text-white bg-transparent transition-all duration-300"
             >
               Learn More
             </Button>
