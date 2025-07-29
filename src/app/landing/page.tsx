@@ -196,7 +196,7 @@ export default function StreamNestLanding() {
                 Sign In
               </Button>
               <Button
-                onClick={() => router.push("/auth/sigunuo")}
+                onClick={() => router.push("/auth/signup")}
                 className=" cursor-pointer bg-gradient-to-r from-primary to-chart-2 hover:from-primary/90 hover:to-chart-2/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Get Started
